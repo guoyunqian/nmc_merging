@@ -18,7 +18,6 @@ from publictype.fixparamtypes import FixParamTypes
 from publictype.fixfileTypes import FixFileTypes
 from publictype.gribtypes import GribTypes
 import public
-#import config
 from config.config import Config
 from config.subconfig import SubConfig
 from config.srcfileconfig import SrcFileConfig
@@ -44,89 +43,43 @@ def get_etime():
         return curutcdt.replace(minute=0)
     '''
 #fix_etime = get_etime()
-fix_etime = datetime.datetime.now().replace(minute=0,second=0,microsecond=0)
+fix_etime = datetime.datetime.now().replace(second=0,microsecond=0)
 #fix_stime = fix_etime - datetime.timedelta(hours=12)
-
-#文件的时间
-#fdt = None
-
-#回推小时数
-#t_num = 24*2
-
-#源文件名中的时间是否是北京时间
-s_is_bjt = True
-#目标文件名中的时间是否是北京时间
-d_is_bjt = True
 
 #获取时间列表时，每个时间的最小间隔
 delta_t = 60
 
-#预报是08时，实况为8点到13点
-#deltas = list(range(0, 6*60, 60))
-
 #确定文件的时间差
 s_f_delta = None
-s_f_deltas = None
 
+#确定起报时的时间差
 s_fhs_delta = None
-s_fhs_deltas = None
 
 d_fhs_delta = int(2.5*60)
 
 #源文件目录
 fix_dict = None
-fix_dicts = None
 
 #目标文件目录
 save_dict = None
 
-#dt_fmt = [[['ITFMT', '%Y%m%d%H']], [['ITFMT', '%Y%m%d%H']]]
-
 #源文件名
 fix_fn_fmt = None
-fix_fn_fmts = None
 
 #目标文件名
 save_fn_fmt = None
 
 #获取时间时，需要选择的小时，使用range获得，或者直接用list指定
 s_fhs = None
-s_fhs_s = None
 
 save_fhs = None
 
 #预报时效
 s_seq = None
 d_seq = None
-s_seq_s = None
-d_seq_s = None
 
 #时效格式
 d_seq_fmt = None
-
-#decimals = 3
-#ns_to_s = 10**-9
-
-#记录文件路径
-dtinfospath = None
-#上次处理的文件的修改时间
-#{'QPE':dt,'SCMOC':dt,'SMERGE':dt}
-dtinfos = None
-
-#f_type = None
-#fm_type = None
-
-#columns=[ColumnNames.StaID.value, ColumnNames.TMX.value]
-
-#workdir = os.path.dirname(__file__)
-#stafilepath = os.path.join(workdir, 'station_2401.dat')
-
-#stabaseinfos = public.get_stations_from_csv(stafilepath, dropcol=[1,2,3], columns=[ColumnNames.StaID.value, ColumnNames.Area.value])
-#stabaseinfos[ColumnNames.Result.value] = 0
-#filters = [ [ColumnNames.Seq.value, ConditionTypes.Equal, 24] ]
-
-#sumgrd = copy.deepcopy(stabaseinfos)
-#sumgrd[ColumnNames.Result.value] = 0
 
 #日志文件存储目录
 log_file_dir = 'logfiles'
@@ -138,23 +91,20 @@ cfg_file_dir = 'config'
 #日志文件的文件名
 cfg_file_name = 'config.ini'
 
-#def get_seqnum_from_fn(fname):
-#    return int(int(fname[-11:-8]) / 60)
-
+#初始化日志
 def init_log(logfile):
     LogLib.init()
     LogLib.addTimedRotatingFileHandler(logfile)
     LogLib.setLevel(logging.DEBUG)
     
+#关闭日志
 def uninit_log():
     LogLib.uninit()
     
+#进行业务处理
 def proc():
-    #fftime = FixFileTime()
     ffinfos = FixFileInfos()
     frdata = FixReadData()
-    #fmdata = FixModifyData()
-    #fmuldata = FixMulData()
     fwdata = FixWriteData()
     frecdata = FixRecordData()
     fdata = FixData()
@@ -166,23 +116,6 @@ def proc():
 
         return
 
-    '''
-    dtlistparams = { FixParamTypes.STime:fix_stime, FixParamTypes.ETime:fix_etime, FixParamTypes.RangeDelta:delta_t,
-                    FixParamTypes.RangeDelta_OBS:delta_t_obs, FixParamTypes.Deltas:deltas
-                    }
-                    '''
-    '''
-    fixdelta = 0
-    if s_is_bjt != d_is_bjt:
-        if s_is_bjt:
-            fixdelta = -8
-        else:
-            fixdelta = 8
-            '''
-    #f_delta = 18
-    #if not s_is_bjt:
-    #    f_delta += 8*60
-        
     filelistparams = { FixParamTypes.SDict:fix_dict, FixParamTypes.SFnFmt:fix_fn_fmt, FixParamTypes.DDict:save_dict,
                       FixParamTypes.DFnFmt:save_fn_fmt, FixParamTypes.DT:fix_etime, FixParamTypes.SSeq:s_seq,
                       FixParamTypes.DSeq:d_seq, FixParamTypes.DSeqFmt:d_seq_fmt, FixParamTypes.SFHS:s_fhs,
@@ -191,25 +124,13 @@ def proc():
 
     readdataparams = { FixParamTypes.SeqField:GribTypes.stepRange
                       }
-    '''
-    muldataparams = { FixParamTypes.DstGridData:sumgrd, FixParamTypes.SName:ColumnNames.TMX.value,
-                     FixParamTypes.DName:ColumnNames.Result.value, FixParamTypes.Columns:columns
-                     }
-                     '''
 
     writedataparams = { 
                        }
     
-    #recorddataparams = { FixParamTypes.RecordData:dtinfos, FixParamTypes.RecordPath:dtinfospath, FixParamTypes.RecordFDTType:f_type,
-    #                    FixParamTypes.RecordFMDTType:fm_type
-    #                    }
-
-    fixdataparams = { #FixProcTypes.DTList:[fftime.get_time_from_datetime_for_single_pre_mul_obs, dtlistparams],
-                     FixProcTypes.FileList:[ffinfos.get_fix_path_list_last, filelistparams],
+    fixdataparams = { FixProcTypes.FileList:[ffinfos.get_fix_path_list_last, filelistparams],
                      FixProcTypes.ReadData:[frdata.read_gribdata_from_grib2_with_pygrib_single_file_seqnum, readdataparams],
-                     #FixProcTypes.MulData:[fmuldata.verify_sta_tmx_pre_mul_obs, muldataparams],
-                     FixProcTypes.WriteData:[fwdata.save_gribs_to_m4, writedataparams]#,
-                     #FixProcTypes.RecordData:[frecdata.save_dtinfos, recorddataparams]
+                     FixProcTypes.WriteData:[fwdata.save_gribs_to_m4, writedataparams]
                      }
 
     fdata.fix_data_muldst_notime(fixdataparams)
@@ -270,10 +191,6 @@ def set_params(params, workdir):
         else:
             d_seq_fmt = None
             
-        #global log_file_name
-        #if FixParamTypes.CfgFilePath in params:
-        #    log_file_name = params[FixParamTypes.CfgFilePath]
-
         global fix_stime
         if FixParamTypes.STime in params:
             fix_stime = params[FixParamTypes.STime]
@@ -361,20 +278,6 @@ if __name__ == '__main__':
             LogLib.logger.error('set_params config error')
             uninit_log()
             sys.exit(1)
-
-        '''
-        fix_dict = fix_dicts[i]
-        fix_fn_fmt = fix_fn_fmts[i]
-        
-        s_fhs = s_fhs_s[i]
-
-        s_seq = s_seq_s[i]
-        d_seq = d_seq_s[i]
-
-        s_f_delta = s_f_deltas[i]
-
-        s_fhs_delta = s_fhs_deltas[i]
-        '''
 
         proc()
     

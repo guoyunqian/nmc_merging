@@ -1389,6 +1389,7 @@ class FixFileInfos(object):
     def get_save_filename(self, dt, save_dict, save_fn_fmt, save_seq, save_seq_fmt, save_fhs, fhsdelta):
         tmpdt = dt
         tmpdt += datetime.timedelta(minutes=fhsdelta)
+        dt = dt.replace(minute=0)
 
         while(True):
             if tmpdt.hour in save_fhs:
