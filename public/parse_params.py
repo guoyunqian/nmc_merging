@@ -14,7 +14,7 @@ import getopt
 from configparser import ConfigParser
 
 from publictype.fixparamtypes import FixParamTypes
-from logmodule.loglib import *
+#from logmodule.loglib import *
 
 #转换类似20210120这样的字符串为datetime
 def parse_dt_format(dtstr):
@@ -100,17 +100,20 @@ def parse_dt(param_str, is_bj=True):
 #'-t': 与起报时一起确定需要处理的每个时刻的文件，同-b格式相同，对应fms
 #'-s': 时效，与-b格式相同，对应seqobj
 #格式说明：a,b,c:d:e,f:g,h，逗号分开每个值，冒号分开部分为一个整体，用来生成序列，同range
-#对于区间的类型，当前只支持数值类型
-def parse_list(param_str, is_num=True):
+#对于区间的类型，当前只支持数值类型，right_c默认为False，不包括右值，如果为True，则用range获得列表时，需要将结束值加1
+#区间类型
+def parse_list(param_str, is_num=True, right_c=False):
     rst = []
     v_list = param_str.split(',')
     for v in v_list:
         if v.find(':') > 0:
             s_list = v.split(':')
-            if len(s_list) == 2:
-                rst.extend(list(range(int(s_list[0]), int(s_list[1]))))
-            elif len(s_list) == 3:
-                rst.extend(list(range(int(s_list[0]), int(s_list[1]), int(s_list[2]))))
+            slen = len(s_list)
+            if slen == 2 or slen == 3:
+                stop = int(s_list[1]) + 1 if right_c else int(s_list[1])
+                step = 1 if slen == 2 else int(s_list[2])
+
+                rst.extend(list(range(int(s_list[0]), stop, step)))
             else:
                 raise Exception('format error %s' % (v))
         else:
@@ -158,13 +161,13 @@ def parse_prog_params(params=None):
                 params[FixParamTypes.DPathExist] = False
             else:
                 print("参数错误：%s == %s>" % (opt, arg))
-                LogLib.logger.error('parse_prog_params params error:%s == %s>' % (opt, arg))
+                #LogLib.logger.error('parse_prog_params params error:%s == %s>' % (opt, arg))
                 return None
 
         return params
     except Exception as data:
         print("获取参数错误")
-        LogLib.logger.error('parse_prog_params except:%s' % (str(data)))
+        #LogLib.logger.error('parse_prog_params except:%s' % (str(data)))
         return None
     
 #读取ini文件中的时间设置，格式如parse_dt中介绍。
@@ -269,7 +272,7 @@ def parse_ini_params(inipath, params=None):
         return params
     except Exception as data:
         print("获取参数错误")
-        LogLib.logger.error('parse_ini_params except:%s' % (str(data)))
+        #LogLib.logger.error('parse_ini_params except:%s' % (str(data)))
         return None
     '''
 
@@ -277,12 +280,12 @@ def parse_ini_params(inipath, params=None):
 def parse_ini_file(inipath):
     try:
         cfg = ConfigParser()
-        cfg.read(inipath)
+        cfg.read(inipath, encoding='utf8')
         
         return cfg
     except Exception as data:
         print("获取参数错误")
-        LogLib.logger.error('parse_ini_file except:%s' % (str(data)))
+        #LogLib.logger.error('parse_ini_file except:%s' % (str(data)))
         return None
 
 

@@ -35,6 +35,7 @@ class FixParamTypes(Enum):
     DFDelta = 'd_f_delta'
     DFDeltas = 'd_f_deltas'
 
+    FhsDelta = 'fhs_delta'             #起报时的间隔
     SFhsDelta = 's_fhs_delta'          #确定提前生成/使用新的时效的文件的差值
     SFhsDeltas = 's_fhs_deltas'
     DFhsDelta = 'd_fhs_delta'
@@ -78,6 +79,7 @@ class FixParamTypes(Enum):
     PNumField = 'p_num_field'          #扰动场对应的字段
 
     SeqAndPNum = 'seq_and_p_num'       #包含seq和pnum信息的字符串，格式为pnum_seq，可以没有pnum，值为seq
+    SeqKeyIsNum = 'seq_key_is_num'     #字典中seq为key时，True代表保持seq为数值，False代表seq需要转换成字符串
 
     SDict = 's_dict'                   #源文件的目录
     SDicts = 's_dicts'                 #多个源文件的目录
@@ -120,6 +122,8 @@ class FixParamTypes(Enum):
     GridDataList = 'grid_data_list'    #读出的需要处理、保存的数据的列表
     DstGridData = 'dst_grid_data'      #处理过的数据
     
+    DatasName = 'datas_name'           #数据集名称
+
     StaID = 'sta_id'                   #站点id
     StaIDs = 'sta_ids'                 #站点ids
     StaCode = 'sta_code'               #站点代码
@@ -136,6 +140,9 @@ class FixParamTypes(Enum):
     GridR = 'grid_r'                   #读文件时的grid，meb.grid([70,140,0.05],[0,60,0.05])#网格信息
     GridW = 'grid_w'                   #修改数据时的grid
     
+    MinValue = 'min_value'             #最小值
+    MaxValue = 'max_value'             #最大值
+    DiffNum = 'diff_num'               #不同值的数目
     Miss = 'miss'                      #文件中无数据时数据项的数值
     Default = 'default'                #无数据时数据项的默认值
     UseAround = 'use_around'           #浮点比较时是否使用numpy的around函数先确定精度
@@ -167,10 +174,15 @@ class FixParamTypes(Enum):
     Title = 'title'                    #文件中的title，micaps或者其他
     Encoding = 'encoding'              #编码类型
     
+    LevelField = 'level_field'         #level对应的字段
+
     Proc = 'proc'                      #函数
     TimeProc = 'time_proc'             #时间的处理函数，cmadaas的times和timerange
     SetParamsProc = 'set_params_proc'  #设置参数的函数
     SeqProc = 'seq_proc'               #seqnum的处理函数
+
+    FuncName = 'func_name'             #函数的名字
+    FuncData = 'func_data'             #函数用到的数据集
 
     RecordPath = 'rec_path'            #保存记录的文件全路径
     RecordData = 'rec_data'            #记录数据
@@ -195,6 +207,9 @@ class FixParamTypes(Enum):
 
     Ascending = 'ascending'
 
+    GribRst = 'grib_rst'               #读grib文件时，True是返回grib，False是返回xarray
+
+    ComPreferred = 'com_preferred'     #完整数据优先
 if __name__ == '__main__':
     
     a=FixParamTypes.STime

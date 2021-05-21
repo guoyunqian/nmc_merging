@@ -74,6 +74,15 @@ def get_dts_withec(curdt, dtcount):
 
     return dts
 
+#找最近的一个起报时的时间，间隔为分钟，60的整数倍
+def get_dt_with_fhs(dt, fhs, delta, fhs_delta=0):
+    if fhs_delta != 0:
+        dt -= datetime.timedelta(hours=fhs_delta)
+
+    while(dt.hour not in fhs):
+        dt -= datetime.timedelta(minutes=delta)
+
+    return dt.replace(minute=0, second=0, microsecond=0)
 
 if __name__ == '__main__':
     print(get_dts_withec(datetime.datetime.now(), 20))

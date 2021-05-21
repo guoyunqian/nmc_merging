@@ -5,9 +5,9 @@ cd "/space/cmadaas/dpl/NWFD01/workenv/fix-cmadaas-env/bin"
 
 source activate
 
-cd "/space/cmadaas/dpl/NWFD01/code/fix-mulblend"
+cd "/space/cmadaas/dpl/NWFD01/code/nmc_merging"
 
-python3 ./fix-mulblend.py
+python3 ./nmc_merging.py
 
 deactivate
 

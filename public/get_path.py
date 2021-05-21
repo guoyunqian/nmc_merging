@@ -47,6 +47,48 @@ def get_path_infos(fn, workdir=None, defaultdir=None, defaultfn=None, create_dir
 
     return(dir, filename)
 
+full_year_fmt = '[YYYY]'
+year_fmt = '[yy]'
+month_fmt = '[mm]'
+day_fmt = '[dd]'
+hour_fmt = '[HH]'
+minute_fmt = '[MM]'
+second_fmt = '[SS]'
+seq_fmt_03 = '[FFF]'
+seq_fmt_04 = '[FFFF]'
+
+#
+def get_path_with_replace(path_or_filename, dt=None, seq=None):
+    if dt is not None:
+        if path_or_filename.find(full_year_fmt) >= 0:
+            path_or_filename = path_or_filename.replace(full_year_fmt, ('%04d' % dt.year))
+        
+        if path_or_filename.find(year_fmt) >= 0:
+            path_or_filename = path_or_filename.replace(year_fmt, ('%04d' % dt.year)[2:])
+
+        if path_or_filename.find(month_fmt) >= 0:
+            path_or_filename = path_or_filename.replace(month_fmt, ('%02d' % dt.month))
+            
+        if path_or_filename.find(day_fmt) >= 0:
+            path_or_filename = path_or_filename.replace(day_fmt, ('%02d' % dt.day))
+
+        if path_or_filename.find(hour_fmt) >= 0:
+            path_or_filename = path_or_filename.replace(hour_fmt, ('%02d' % dt.hour))
+
+        if path_or_filename.find(minute_fmt) >= 0:
+            path_or_filename = path_or_filename.replace(minute_fmt, ('%02d' % dt.minute))
+
+        if path_or_filename.find(second_fmt) >= 0:
+            path_or_filename = path_or_filename.replace(second_fmt, ('%02d' % dt.second))
+            
+    if seq is not None:
+        if path_or_filename.find(seq_fmt_03) >= 0:
+            path_or_filename = path_or_filename.replace(seq_fmt_03, ('%03d' % seq))
+        elif path_or_filename.find(seq_fmt_04) >= 0:
+            path_or_filename = path_or_filename.replace(seq_fmt_04, ('%04d' % seq))
+            
+    return path_or_filename
+
 if __name__ == '__main__':
 
     print('test done')

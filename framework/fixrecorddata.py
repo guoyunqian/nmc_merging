@@ -11,7 +11,6 @@ Created on Mar 23, 2021
 import os
 import json
 
-from logmodule.loglib import *
 from publictype.fixparamtypes import FixParamTypes
 
 class FixRecordData(object):
@@ -33,7 +32,7 @@ class FixRecordData(object):
             else:
                 return {}
         except Exception as data:
-            LogLib.logger.error('FixMulData read_dtinfos except %s %s' % (str(params), str(data)))
+            #LogLib.logger.error('FixMulData read_dtinfos except %s %s' % (str(params), str(data)))
 
             return None
 
@@ -47,7 +46,7 @@ class FixRecordData(object):
 
             return True
         except Exception as data:
-            LogLib.logger.error('FixMulData save_dtinfos except %s %s' % (str(params), str(data)))
+            #LogLib.logger.error('FixMulData save_dtinfos except %s %s' % (str(params), str(data)))
 
             return False
 
