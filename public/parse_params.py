@@ -139,16 +139,16 @@ def parse_prog_params(params=None):
         opts, args = getopt.getopt(sys.argv[1:], short_params, long_params)
         for opt, arg in opts:
             if opt == '-d':
-                params['s_is_bjt'] = True
-                params['fix_stime'], params['fix_etime'] = parse_dt(arg)
-            if opt == '-u':
-                params['s_is_bjt'] = False
-                params['fix_stime'], params['fix_etime'] = parse_dt(arg, is_bj=False)
-            if opt == '--d-is-bjt':
+                params[FixParamTypes.SIsBJT] = True
+                params[FixParamTypes.STime], params[FixParamTypes.ETime] = parse_dt(arg)
+            elif opt == '-u':
+                params[FixParamTypes.SIsBJT] = False
+                params[FixParamTypes.STime], params[FixParamTypes.ETime] = parse_dt(arg, is_bj=False)
+            elif opt == '--d-is-bjt':
                 if arg.lower() == 'true':
-                    params['d_is_bjt'] = False
+                    params[FixParamTypes.DIsBJT] = False
                 elif arg.lower() == 'false':
-                    params['d_is_bjt'] = False
+                    params[FixParamTypes.DIsBJT] = False
                 else:
                     raise Exception('--d-is-bjt is error %s' % arg)
             elif opt == '-b':

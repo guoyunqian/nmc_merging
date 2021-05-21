@@ -353,7 +353,7 @@ def proc(cfgobj):
     write_data(cfgobj)
 
 if __name__ == '__main__':
-    workdir = os.path.dirname(__file__)
+    workdir = os.path.dirname(os.path.abspath(__file__))
     
     logdir, logfile = public.get_path_infos(None, workdir=workdir, defaultdir=log_file_dir, defaultfn=log_file_name)
 
@@ -396,7 +396,7 @@ if __name__ == '__main__':
                 fix_etime = etime
                 proc(cfgobj)
 
-                fix_etime -= datetime.timedelta(minutes=delta_t)
+                etime -= datetime.timedelta(minutes=delta_t*12)
     else:
         proc(cfgobj)
 
