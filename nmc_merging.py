@@ -218,23 +218,23 @@ def set_params(params, workdir):
     '''
 
 
-def need_backup(datas, seq, seq_delta=0):
-    need_seq_set = set(seq)
-    exist_seq_set = set(list(datas.keys()))
+def need_backup(exist_seq, need_seq, seq_delta=0):
+    need_seq_set = set(need_seq)
+    exist_seq_set = set(exist_seq)
     if seq_delta < 0:
         exist_seq_set.update(range(1, -seq_delta+1))
 
     return (len(need_seq_set.difference(exist_seq_set)) > 0)
 
 #读数据
-def read_data(dt, srccfg):
+def read_data(dt, srccfg, cur_d_seq):
     ffinfos = FixFileInfos()
     frdata = FixReadData()
 
     read_data_list = []
     cur_src_datas = {}
+    cur_total_seq = set([])
 
-    cur_d_seq = srccfg[FixParamTypes.DSeq]
     is_complete = False
 
     for bobj, fhs_delta in srccfg[FixParamTypes.CfgObj].srclist:
@@ -262,9 +262,14 @@ def read_data(dt, srccfg):
         
         for k,v in grdlist.items():
             cur_src_datas[k-seq_delta] = v
+            cur_total_seq.add(k-seq_delta)
 
-        if need_backup(cur_src_datas, cur_d_seq, seq_delta):
+        if need_backup(cur_src_datas.keys(), cur_d_seq, seq_delta):
             read_data_list.append(grdlist)
+
+            if not bobj[FixParamTypes.ComPreferred]:
+                if not need_backup(cur_total_seq, curcur_d_seq, seq_delta):
+                    break
         else:
             is_complete = True
             break
@@ -336,9 +341,13 @@ def proc(cfgobj):
     save_e_time = fix_etime+datetime.timedelta(minutes=cfgobj.savecfginfos[FixParamTypes.DFhsDelta])
     save_dt = public.get_dt_with_fhs(save_e_time, cfgobj.savecfginfos[FixParamTypes.DFHS], delta_t)
 
+    minseqnum = int((fix_etime.replace(minute=0, second=0, microsecond=0) - save_dt).total_seconds() / 3600)
+
     #从数据源获得数据
     for srccfg in cfgobj.srccfglist:
-        read_data(fix_etime, srccfg)
+        cur_d_seq = srccfg[FixParamTypes.DSeq] if minseqnum <= 0 else list(set(srccfg[FixParamTypes.DSeq]).difference(set(range(1, minseqnum+1))))
+
+        read_data(fix_etime, srccfg, cur_d_seq)
 
     #处理数据
     for proccfg in cfgobj.proccfglist:
