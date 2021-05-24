@@ -24,8 +24,6 @@ from cfg_srcdata import CfgSrcData
 from framework.fixfileinfos import FixFileInfos
 from framework.fixreaddata import FixReadData
 from framework.fixwritedata import FixWriteData
-#from framework.fixrecorddata import FixRecordData
-#from framework.fixdata import FixData
 
 import procfunc
 
@@ -111,12 +109,19 @@ save_dt = None
 
 #初始化日志
 def init_log(logfiles):
+    global loglib
+
     if loglib is None:
         loglib = LogLibMul()
 
-    loglib.init(logfiles)
+    loglib.init(logfiles.keys())
     loglib.addTimedRotatingFileHandler(logfiles)
-    loglib.setLevel(logging.DEBUG)
+
+    levels = {}
+    for k,v in logfiles.items():
+        levels[k] = logging.DEBUG
+
+    loglib.setLevel(levels)
     
 '''
 def set_params(params, workdir):
@@ -227,9 +232,10 @@ def need_backup(exist_seq, need_seq, seq_delta=0):
     return (len(need_seq_set.difference(exist_seq_set)) > 0)
 
 #读数据
-def read_data(dt, srccfg, cur_d_seq):
-    ffinfos = FixFileInfos()
-    frdata = FixReadData()
+def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata):
+    logger = loglib.getlogger(srccfg[FixParamTypes.DatasName])
+
+    logger.info('read_data start')
 
     read_data_list = []
     cur_src_datas = {}
@@ -244,20 +250,21 @@ def read_data(dt, srccfg, cur_d_seq):
         read_dt = public.get_dt_with_fhs(read_e_dt, cfgobj[FixParamTypes.SFHS], delta_t, fhs_delta=fhs_delta)
 
         flistparams = { FixParamTypes.DT:read_dt, FixParamTypes.SDict:cfgobj[FixParamTypes.SDict],
-                       FixParamTypes.SFnFmt:cfgobj[FixParamTypes.SFnFmt], FixParamTypes.SFDelta:cfgobj[FixParamTypes.SFDelta]
+                       FixParamTypes.SFnFmt:cfgobj[FixParamTypes.SFnFmt], FixParamTypes.SFDelta:cfgobj[FixParamTypes.SFDelta],
+                       FixParamTypes.CurLogger:logger
                        }
 
         fixfullpath = ffinfos.get_fix_path_list_last(flistparams)
         if fixfullpath == None:
-            #LogLib.logger.warning('FixData fix_data_muldst_notime process datetime no file %s' % (str(flistparams)))
+            logger.warning('read_data no file %s' % (str(flistparams)))
             continue
             
         seq_delta = int((save_dt - read_dt).total_seconds() / 3600)
         
         grdlist = public.get_grid_from_grib_file(frdata, fixfullpath, read_dt, list(map(lambda x:x+seq_delta, srccfg[FixParamTypes.DSeq])),
-                                                 seq_field=GribTypes.stepRange, gribrst=False, seq_key_is_num=True)
+                                                 seq_field=GribTypes.stepRange, gribrst=False, seq_key_is_num=True, logger=logger)
         if grdlist is None:
-            #LogLib.logger.error('FixData fix_data_muldst_notime read file error %s' % (fixfullpath))
+            logger.error('read_data read file error %s' % (fixfullpath))
             sys.exit(1)
         
         for k,v in grdlist.items():
@@ -268,7 +275,7 @@ def read_data(dt, srccfg, cur_d_seq):
             read_data_list.append(grdlist)
 
             if not bobj[FixParamTypes.ComPreferred]:
-                if not need_backup(cur_total_seq, curcur_d_seq, seq_delta):
+                if not need_backup(cur_total_seq, cur_d_seq, seq_delta):
                     break
         else:
             is_complete = True
@@ -288,10 +295,14 @@ def read_data(dt, srccfg, cur_d_seq):
                     rsts[s] = datas[s]
 
         src_datas[srccfg[FixParamTypes.DatasName]] = rsts
+        
+    logger.info('read_data over')
 
-def get_save_paths():
-    ffinfos = FixFileInfos()
-    
+def get_save_paths(ffinfos):
+    logger = loglib.getlogger(log_file_name)
+
+    logger.info('get_save_paths start')
+
     params = { FixParamTypes.DT:save_dt, FixParamTypes.DDict:cfgobj.savecfginfos[FixParamTypes.DDict],
               FixParamTypes.DFnFmt:cfgobj.savecfginfos[FixParamTypes.DFnFmt], FixParamTypes.DSeq:cfgobj.savecfginfos[FixParamTypes.DSeq]
               }
@@ -299,16 +310,22 @@ def get_save_paths():
     saveinfos = ffinfos.get_save_path(params)
 
     if saveinfos is None:
+        logger.info('get_save_paths error')
+
         return False
 
     dst_fullpaths.update(saveinfos)
 
+    logger.info('get_save_paths over')
+
     return True
 
-def write_data(cfgobj):
+def write_data(cfgobj, fwrite):
+    logger = loglib.getlogger(log_file_name)
+
+    logger.info('write_data start')
+
     #保存
-    fwrite = FixWriteData()
-    
     wparams = {}
     wparams[FixParamTypes.DT] = save_dt
 
@@ -330,13 +347,19 @@ def write_data(cfgobj):
         wparams[FixParamTypes.SeqNum] = seqnum
 
         if fwrite.save_griddata_to_m4_no_meb(wparams):
-            #LogLib.logger.info('save griddata file over %s' % (dst_fullpaths[seqnum]))
-            pass
+            logger.info('save griddata file over %s' % (dst_fullpaths[seqnum]))
         else:
-            #LogLib.logger.error('save griddata file file error %s' % (dst_fullpaths[seqnum]))
-            pass
+            logger.error('save griddata file file error %s' % (dst_fullpaths[seqnum]))
+
+    logger.info('write_data over')
 
 def proc(cfgobj):
+    logger = loglib.getlogger(log_file_name)
+    
+    ffinfos = FixFileInfos(logger)
+    frdata = FixReadData(logger)
+    fwrite = FixWriteData(logger)
+    
     global save_dt
     save_e_time = fix_etime+datetime.timedelta(minutes=cfgobj.savecfginfos[FixParamTypes.DFhsDelta])
     save_dt = public.get_dt_with_fhs(save_e_time, cfgobj.savecfginfos[FixParamTypes.DFHS], delta_t)
@@ -347,37 +370,39 @@ def proc(cfgobj):
     for srccfg in cfgobj.srccfglist:
         cur_d_seq = srccfg[FixParamTypes.DSeq] if minseqnum <= 0 else list(set(srccfg[FixParamTypes.DSeq]).difference(set(range(1, minseqnum+1))))
 
-        read_data(fix_etime, srccfg, cur_d_seq)
+        read_data(fix_etime, srccfg, cur_d_seq, ffinfos, frdata)
 
     #处理数据
     for proccfg in cfgobj.proccfglist:
-        pparams = procfunc.procfuncs.set_func_params(proccfg[FixParamTypes.FuncName], save_dt, proccfg, src_datas, cfgobj.savecfginfos, dst_datas)
-        procfunc.procfuncs.run_func(proccfg[FixParamTypes.FuncName], pparams)
+        pparams = procfunc.procfuncs.set_func_params(proccfg[FixParamTypes.FuncName], save_dt, proccfg, src_datas, cfgobj.savecfginfos, dst_datas, logger)
+        procfunc.procfuncs.run_func(proccfg[FixParamTypes.FuncName], pparams, logger)
         
     #获取数据保存信息
-    if not get_save_paths():
+    if not get_save_paths(ffinfos):
         return
 
     #保存
-    write_data(cfgobj)
+    write_data(cfgobj, fwrite)
 
 if __name__ == '__main__':
     workdir = os.path.dirname(os.path.abspath(__file__))
     
     logdir, logfile = public.get_path_infos(None, workdir=workdir, defaultdir=log_file_dir, defaultfn=log_file_name)
 
-    #init_log(logfile)
+    init_log({ log_file_name:logfile })
     
     progparams = public.parse_prog_params()
     if progparams is None:
         print('program params error')
-        #LogLib.logger.error('program params error')
+        loglib.getlogger(log_file_name).error('program params error')
         sys.exit(1)
 
     if FixParamTypes.LogFilePath in progparams:
+        loglib.uninit()
+
         logdir, logfile = public.get_path_infos(progparams[FixParamTypes.LogFilePath], workdir=workdir, defaultdir=log_file_dir, defaultfn=log_file_name)
 
-        init_log([logfile])
+        init_log({ log_file_name:logfile })
 
     cfgfiledir = None
     cfgfilepath = None
@@ -386,16 +411,20 @@ if __name__ == '__main__':
     else:
         cfgfiledir, cfgfilepath = public.get_path_infos(None, workdir=workdir, defaultdir=cfg_file_dir, defaultfn=cfg_file_name)
 
-    cfgobj = CfgMain()
+    cfgobj = CfgMain(loglib.getlogger(log_file_name))
     if cfgobj.parse(cfgfilepath) is None:
         #print('config ini params error')
-        #LogLib.logger.error('config ini params error')
+        loglib.getlogger(log_file_name).logger.error('config ini params error')
         sys.exit(1)
 
+    for srccfg in cfgobj.srccfglist:
+        srclogdir, srclogfile = public.get_path_infos(srccfg[FixParamTypes.LogFilePath], workdir=logdir)
+        init_log({ srccfg[FixParamTypes.DatasName]:srclogfile })
+
     if FixParamTypes.STime in progparams and FixParamTypes.ETime in progparams:
-        if FixParamTypes.STime is None:
+        if progparams[FixParamTypes.STime] is None:
             proc(cfgobj)
-        elif FixParamTypes.ETime is None:
+        elif progparams[FixParamTypes.ETime] is None:
             fix_etime = progparams[FixParamTypes.STime]
             proc(cfgobj)
         else:

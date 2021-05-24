@@ -12,11 +12,12 @@ import os
 import shutil
 import datetime
 
+import public
 from publictype.fixparamtypes import FixParamTypes
 
 func_name = 'check_value_scope'
 
-def get_params(cfg, section, params):
+def get_params(cfg, section, params, logger):
     #有效值的最小值
     rst = public.get_opt_float(cfg, section, 'min_value')
     if rst is None:
@@ -36,9 +37,9 @@ def get_params(cfg, section, params):
     if rst is None:
         raise Exception('check_value_scope %s replace_src error' % section)
     
-    srccfg[FixParamTypes.CfgFilePath] = rst
+    params[FixParamTypes.CfgFilePath] = rst
 
-def run_func(params):
+def run_func(params, logger):
     pass
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ import public
 
 func_name = 'missing'
 
-def get_params(cfg, section, params):
+def get_params(cfg, section, params, logger):
     #缺测值
     rst = public.get_opt_float(cfg, section, 'miss_value')
     if rst is None:
@@ -26,7 +26,7 @@ def get_params(cfg, section, params):
     params[FixParamTypes.Miss] = rst
     
 '''
-def run_func(params):
+def run_func(params, logger):
     dt = params[FixParamTypes.DT]
     nlon = params[FixParamTypes.NLon]
     nlat = params[FixParamTypes.NLat]

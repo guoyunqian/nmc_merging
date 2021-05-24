@@ -14,7 +14,7 @@ from publictype.fixparamtypes import FixParamTypes
 func_name = 'select'
 
 #读select函数需要的参数
-def get_params(cfg, section, params):
+def get_params(cfg, section, params, logger):
     #处理过程需要用到的数据集合
     rst = public.get_opt_str(cfg, section, 'data')
     if rst is None or len(rst) == 0:
@@ -41,7 +41,7 @@ def get_params(cfg, section, params):
     params[FixParamTypes.SeqObj] = seq
 
 #设置运行参数
-def set_func_params(save_dt, func_params, src_datas, savecfginfos, dst_datas):
+def set_func_params(save_dt, func_params, src_datas, savecfginfos, dst_datas, logger):
     params = {}
     params[FixParamTypes.GridDataList] = src_datas[func_params[FixParamTypes.DatasName]]
     params[FixParamTypes.DstGridData] = dst_datas
@@ -64,7 +64,7 @@ def set_func_params(save_dt, func_params, src_datas, savecfginfos, dst_datas):
     return params
 
 #select数据
-def run_func(params):
+def run_func(params, logger):
     datas = params[FixParamTypes.GridDataList]
     dt = params[FixParamTypes.DT]
     nlon = params[FixParamTypes.NLon]

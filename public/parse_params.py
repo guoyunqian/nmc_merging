@@ -14,7 +14,6 @@ import getopt
 from configparser import ConfigParser
 
 from publictype.fixparamtypes import FixParamTypes
-#from logmodule.loglib import *
 
 #转换类似20210120这样的字符串为datetime
 def parse_dt_format(dtstr):
@@ -128,7 +127,7 @@ def parse_list(param_str, is_num=True, right_c=False):
 #'-o': 覆盖生成，如：'-o'，注意后面不加任何内容，如果存在则设置key为DPathExist的项为False，默认是True，不覆盖
 
 
-def parse_prog_params(params=None):
+def parse_prog_params(params=None, logger=None):
     try:
         short_params = "d:u:b:t:s:f:l:o"
         long_params = ['d-is-bjt=','','']
@@ -161,13 +160,17 @@ def parse_prog_params(params=None):
                 params[FixParamTypes.DPathExist] = False
             else:
                 print("参数错误：%s == %s>" % (opt, arg))
-                #LogLib.logger.error('parse_prog_params params error:%s == %s>' % (opt, arg))
+                if logger:
+                    logger.error('parse_prog_params params error:%s == %s>' % (opt, arg))
+
                 return None
 
         return params
     except Exception as data:
         print("获取参数错误")
-        #LogLib.logger.error('parse_prog_params except:%s' % (str(data)))
+        if logger:
+            logger.error('parse_prog_params except:%s' % (str(data)))
+
         return None
     
 #读取ini文件中的时间设置，格式如parse_dt中介绍。
@@ -244,7 +247,7 @@ def parse_ini_section_mulinfos(params, cfg, sectionname, optnamefmt, singlename,
             params[s_mulname] = infos
                 
 '''            
-def parse_ini_params(inipath, params=None):
+def parse_ini_params(inipath, params=None, logger=None):
     try:
         if params is None:
             params = {}
@@ -272,12 +275,14 @@ def parse_ini_params(inipath, params=None):
         return params
     except Exception as data:
         print("获取参数错误")
-        #LogLib.logger.error('parse_ini_params except:%s' % (str(data)))
+        if logger:
+            logger.error('parse_ini_params except:%s' % (str(data)))
+
         return None
     '''
 
 #解析ini文件，返回ConfigParser对象
-def parse_ini_file(inipath):
+def parse_ini_file(inipath, logger=None):
     try:
         cfg = ConfigParser()
         cfg.read(inipath, encoding='utf8')
@@ -285,7 +290,9 @@ def parse_ini_file(inipath):
         return cfg
     except Exception as data:
         print("获取参数错误")
-        #LogLib.logger.error('parse_ini_file except:%s' % (str(data)))
+        if logger:
+            logger.error('parse_ini_file except:%s' % (str(data)))
+
         return None
 
 

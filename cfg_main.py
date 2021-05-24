@@ -17,7 +17,9 @@ from cfg_srcdata import CfgSrcData
 import procfunc.procfuncs as proc_funcs
 
 class CfgMain(object):
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
+
         #配置文件路径
         self.path = None
         #保存数据的信息
@@ -147,7 +149,10 @@ class CfgMain(object):
         self.savecfginfos[FixParamTypes.DLat] = rst
 
     #解析源数据的信息
-    def parse_data_config(self, cfg, basedir):
+    def parse_data_config(self, cfg, basedir, logger=None):
+        if logger is None:
+            logger = self.logger
+            
         self.srccfglist = []
 
         section_fmt = 'data%02d'
@@ -174,7 +179,7 @@ class CfgMain(object):
             else:
                 srccfg[FixParamTypes.CfgFilePath] = os.path.join(basedir, rst)
 
-            cfgobj = CfgSrcData()
+            cfgobj = CfgSrcData(logger)
             cfgobj.parse(srccfg[FixParamTypes.CfgFilePath])
             srccfg[FixParamTypes.CfgObj] = cfgobj
 
@@ -199,7 +204,7 @@ class CfgMain(object):
             self.srccfglist.append(srccfg)
             
     #解析数据处理方法的配置信息
-    def parse_proc_config(self, cfg):
+    def parse_proc_config(self, cfg, logger=None):
         self.proccfglist = []
 
         section_fmt = 'proc%02d'
@@ -221,14 +226,17 @@ class CfgMain(object):
             
             proccfg[FixParamTypes.FuncName] = rst
 
-            proc_funcs.get_func_params(rst, cfg, section, proccfg)
+            proc_funcs.get_func_params(rst, cfg, section, proccfg, logger if logger else self.logger)
 
             self.proccfglist.append(proccfg)
 
     #解析主配置文件
-    def parse(self, inipath=None):
+    def parse(self, inipath=None, logger=None):
         try:
-            #LogLib.logger.info('config ini parse start')
+            if logger is None:
+                logger = self.logger
+
+            logger.info('config ini parse start')
 
             if inipath is None:
                 inipath = self.path
@@ -237,29 +245,30 @@ class CfgMain(object):
 
             if inipath is None:
                 print('config ini path is none')
-                #LogLib.logger.error('config ini path error')
+                logger.error('config ini path error')
                 return False
 
-            cfgobj = public.parse_ini_file(inipath)
+            cfgobj = public.parse_ini_file(inipath, logger)
             if cfgobj is None:
                 print('config ini params error')
-                #LogLib.logger.error('config ini params error')
+                logger.error('config ini params error')
                 return False
 
             self.parse_save_config(cfgobj)
 
             cfgbasedir = os.path.dirname(inipath)
-            self.parse_data_config(cfgobj, cfgbasedir)
+            self.parse_data_config(cfgobj, cfgbasedir, logger)
 
-            self.parse_proc_config(cfgobj)
+            self.parse_proc_config(cfgobj, logger)
 
-            #LogLib.logger.info('config ini parse over')
+            logger.info('config ini parse over')
 
             return True
         except Exception as data:
-            #LogLib.logger.error('config ini parse except %s' % (str(data)))
+            logger.error('config ini parse except %s' % (str(data)))
             return False
             
+    '''
     #设置读取该数据源或者该数据源备份的参数
     def setparams(self, params, index, backupindex):
         if backupindex is None:
@@ -268,7 +277,8 @@ class CfgMain(object):
             params.update(self.cfginfos)
         else:
             pass
-        
+        '''
+    '''
     #判断从数据源获得的数据是否完整
     def need_backup(self, rsts, index):
         need_seq_set = set(self.srccfglist[index][FixParamTypes.SSeq])
@@ -276,6 +286,7 @@ class CfgMain(object):
         exist_seq_set = set(list(rsts[datas_name].keys()))
         
         return (len(need_seq_set.difference(exist_seq_set)) > 0)
+    '''
 
 if __name__ == '__main__':
     cfg = CfgMain()

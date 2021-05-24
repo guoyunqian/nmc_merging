@@ -18,14 +18,21 @@ import datetime
 from publictype.fixparamtypes import FixParamTypes
 
 class FixModifyData(object):
+    def __init__(self, logger):
+        self.logger = logger
+        
     #如果数据是xarray，当前只支持单数据，名字为tp。
     def eliminate_grid_nan(self, params):
         gdata = params[FixParamTypes.GridData]
         default = params[FixParamTypes.Default]
         deepcopy = params[FixParamTypes.DeepCopy]
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
 
         try:
-            #LogLib.logger.info('FixModifyData eliminate_grid_nan start')
+            logger.info('FixModifyData eliminate_grid_nan start')
             grd = gdata
             if type(gdata) is xarray.core.dataset.Dataset:
                 if 'tp' not in gdata.data_vars:
@@ -42,11 +49,11 @@ class FixModifyData(object):
             a = grd.values
             a[np.isnan(a)] = default
 
-            #LogLib.logger.info('FixModifyData eliminate_grid_nan over')
+            logger.info('FixModifyData eliminate_grid_nan over')
 
             return gdata
         except Exception as data:
-            #LogLib.logger.error('FixModifyData eliminate_grid_nan except:%s' % (str(data)))
+            logger.error('FixModifyData eliminate_grid_nan except:%s' % (str(data)))
 
             raise data
             
@@ -57,9 +64,13 @@ class FixModifyData(object):
         usearound = params[FixParamTypes.UseAround]
         decimals = params[FixParamTypes.Decimals]
         deepcopy = params[FixParamTypes.DeepCopy]
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
 
         try:
-            #LogLib.logger.info('FixModifyData eliminate_grid_missdata start')
+            logger.info('FixModifyData eliminate_grid_missdata start')
             if deepcopy:
                 grd.values = copy.deepcopy(grd.values)
 
@@ -69,11 +80,11 @@ class FixModifyData(object):
             else:
                 a[a==miss] = default
 
-            #LogLib.logger.info('FixModifyData eliminate_grid_missdata over')
+            logger.info('FixModifyData eliminate_grid_missdata over')
 
             return grd
         except Exception as data:
-            #LogLib.logger.error('FixModifyData eliminate_grid_missdata except:%s' % (str(data)))
+            logger.error('FixModifyData eliminate_grid_missdata except:%s' % (str(data)))
 
             raise data
 
@@ -84,19 +95,23 @@ class FixModifyData(object):
         grid = params[FixParamTypes.GridW]
         outer_value = params[FixParamTypes.Default]
         
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
+
         try:
-            #LogLib.logger.info('FixModifyData interp_gg_linear start')
+            logger.info('FixModifyData interp_gg_linear start')
             savegrd = meb.interp_gg_linear(grd, grid, outer_value=outer_value)
             if savegrd is None:
-                #LogLib.logger.error('FixModifyData interp_gg_linear error %s' % (str(params)))
+                logger.error('FixModifyData interp_gg_linear error %s' % (str(params)))
                 return savegrd
             else:
-                #LogLib.logger.info('FixModifyData interp_gg_linear over')
+                logger.info('FixModifyData interp_gg_linear over')
                 pass
 
             return savegrd
         except Exception as data:
-            #LogLib.logger.error('FixModifyData interp_gg_linear except %s %s' % (str(params), str(data)))
+            logger.error('FixModifyData interp_gg_linear except %s %s' % (str(params), str(data)))
 
             raise data
 
@@ -106,13 +121,17 @@ class FixModifyData(object):
         s_dtype = params[FixParamTypes.S_DType]
         d_dtype = params[FixParamTypes.D_DType]
         keep_attrs = params[FixParamTypes.KeepAttrs] if FixParamTypes.KeepAttrs in params else True
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
 
         try:
-            #LogLib.logger.info('FixModifyData change_gird_data_dtype start')
+            logger.info('FixModifyData change_gird_data_dtype start')
             oritype = grd[dname].dtype
             if oritype != s_dtype:
                 if oritype == d_dtype:
-                    #LogLib.logger.info('FixModifyData change_gird_data_dtype no change')
+                    logger.info('FixModifyData change_gird_data_dtype no change')
                     return grd
                 else:
                     raise Exception('dtype error %s' % str(oritype))
@@ -126,11 +145,11 @@ class FixModifyData(object):
             if keep_attrs and attrs is not None:
                 grd[dname].attrs = attrs
 
-            #LogLib.logger.info('FixModifyData change_gird_data_dtype over')
+            logger.info('FixModifyData change_gird_data_dtype over')
 
             return grd
         except Exception as data:
-            #LogLib.logger.error('FixModifyData change_gird_data_dtype except %s %s' % (str(params), str(data)))
+            logger.error('FixModifyData change_gird_data_dtype except %s %s' % (str(params), str(data)))
 
             raise data
         
@@ -146,9 +165,13 @@ class FixModifyData(object):
         delta = params[FixParamTypes.TZ_Delta] if FixParamTypes.TZ_Delta in params else None
         multi = params[FixParamTypes.Multi] if FixParamTypes.Multi in params else 1
         decimals = params[FixParamTypes.Decimals] if FixParamTypes.Decimals in params else None
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
 
         try:
-            #LogLib.logger.info('FixModifyData dataframe_sta_data_convert start')
+            logger.info('FixModifyData dataframe_sta_data_convert start')
             if default is not None:
                 ds[sname].values[np.isnan(ds[sname].values)] = default
 
@@ -187,7 +210,7 @@ class FixModifyData(object):
 
             return griddata
         except Exception as data:
-            #LogLib.logger.error('FixModifyData dataframe_sta_data_convert except %s %s' % (str(params), str(data)))
+            logger.error('FixModifyData dataframe_sta_data_convert except %s %s' % (str(params), str(data)))
 
             raise data
         
@@ -195,19 +218,23 @@ class FixModifyData(object):
     #通过日志输出nan的数量
     def drop_nan(self, params):
         grd = params[FixParamTypes.GridData]
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
 
         try:
-            #LogLib.logger.info('FixModifyData drop_nan start')
+            logger.info('FixModifyData drop_nan start')
             
             allcount = len(grd)
             grd = grd.dropna()
             nancount = allcount - len(grd)
 
-            #LogLib.logger.info('FixModifyData drop_nan over.nan:%d' % (nancount))
+            logger.info('FixModifyData drop_nan over.nan:%d' % (nancount))
 
             return grd
         except Exception as data:
-            #LogLib.logger.error('FixModifyData drop_nan except:%s' % (str(data)))
+            logger.error('FixModifyData drop_nan except:%s' % (str(data)))
 
             raise data
         
@@ -216,16 +243,20 @@ class FixModifyData(object):
         grd = params[FixParamTypes.GridData]
         dt = params[FixParamTypes.DT]
         
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
+
         try:
-            #LogLib.logger.info('FixModifyData set_data_datetime start')
+            logger.info('FixModifyData set_data_datetime start')
             
             grd['time'] = dt
 
-            #LogLib.logger.info('FixModifyData set_data_datetime over.')
+            logger.info('FixModifyData set_data_datetime over.')
 
             return grd
         except Exception as data:
-            #LogLib.logger.error('FixModifyData set_data_datetime except:%s' % (str(data)))
+            logger.error('FixModifyData set_data_datetime except:%s' % (str(data)))
 
             raise data
 

@@ -16,7 +16,7 @@ from publictype.fixparamtypes import FixParamTypes
 
 func_name = 'datasource'
 
-def get_params(cfg, section, params):
+def get_params(cfg, section, params, logger):
     #配置ini
     rst = public.get_opt_str(cfg, section, 'src')
     if rst is None:
@@ -34,7 +34,7 @@ def get_params(cfg, section, params):
     params[FixParamTypes.Deltas] = deltas
     
 '''
-def run_func(params):
+def run_func(params, logger):
     pass
 '''
 

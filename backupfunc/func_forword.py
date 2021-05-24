@@ -17,7 +17,7 @@ from publictype.fixparamtypes import FixParamTypes
 
 func_name = 'forword'
 
-def get_params(cfg, section, params):
+def get_params(cfg, section, params, logger):
     #往回找的时间列表
     rst = public.get_opt_str(cfg, section, 'timedelta')
     if rst is None:
@@ -28,7 +28,7 @@ def get_params(cfg, section, params):
     params[FixParamTypes.Deltas] = deltas
     
 '''
-def run_func(params):
+def run_func(params, logger):
     #filename, dt, seq, seq_field, level_field=None, data_name='data0', gribrst=True
 
     path = params[FixParamTypes.SDict]

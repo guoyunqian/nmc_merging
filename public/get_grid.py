@@ -62,7 +62,7 @@ def get_grid_missing(dt, nlon, nlat, slon, slat, elon, elat, dlon, dlat, level=0
 
     return da
 
-def get_grid_from_grib(grb, dt, seq=None, level_field=None, data_name="data0"):
+def get_grid_from_grib(grb, dt, seq=None, level_field=None, data_name="data0", logger=None):
     if seq is None:
         seq = dt.hour
 
@@ -82,12 +82,13 @@ def get_grid_from_grib(grb, dt, seq=None, level_field=None, data_name="data0"):
 
     return da
 
-def get_grid_from_grib_file(fread, filename, dt, seq, seq_field=None, level_field=None, data_name='data0', gribrst=True, seq_key_is_num=False):
+def get_grid_from_grib_file(fread, filename, dt, seq, seq_field=None, level_field=None, data_name='data0', gribrst=True, seq_key_is_num=False, logger=None):
     params = {}
     params[FixParamTypes.SFullPath] = filename
     params[FixParamTypes.SeqObj] = seq
     params[FixParamTypes.SeqField] = seq_field
     params[FixParamTypes.SeqKeyIsNum] = seq_key_is_num
+    params[FixParamTypes.CurLogger] = logger
 
     rsts = fread.read_gribdata_from_grib2_with_pygrib_single_file_seqnum(params)
 
@@ -100,7 +101,7 @@ def get_grid_from_grib_file(fread, filename, dt, seq, seq_field=None, level_fiel
         if gribrst:
             grds[curseq] = v
         else:
-            grds[curseq] = get_grid_from_grib(v, dt, seq=curseq, level_field=level_field, data_name=data_name)
+            grds[curseq] = get_grid_from_grib(v, dt, seq=curseq, level_field=level_field, data_name=data_name, logger=logger)
 
     return grds
 

@@ -21,7 +21,9 @@ import backupfunc.func_missing as backup_func_missing
 import checkfunc.checkfuncs as check_funcs
 
 class CfgSrcData(object):
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
+
         #配置文件路径
         self.path = None
         #数据源的信息
@@ -163,7 +165,7 @@ class CfgSrcData(object):
         self.srcinfos[FixParamTypes.DLat] = rst
 
     #解析数据备份方法的配置信息
-    def parse_backup_config(self, cfg):
+    def parse_backup_config(self, cfg, logger=None):
         self.backupcfglist = []
 
         section_fmt = 'backup%02d'
@@ -185,13 +187,13 @@ class CfgSrcData(object):
             
             backupcfg[FixParamTypes.FuncName] = rst
 
-            backup_funcs.get_func_params(rst, cfg, section, backupcfg)
+            backup_funcs.get_func_params(rst, cfg, section, backupcfg, logger if logger else self.logger)
 
             self.backupcfglist.append(backupcfg)
 
     #解析数据检查方法的配置信息
-    def parse_check_config(self, cfg):
-        self.backupcfglist = []
+    def parse_check_config(self, cfg, logger=None):
+        self.checkcfglist = []
 
         section_fmt = 'check%02d'
 
@@ -212,7 +214,7 @@ class CfgSrcData(object):
             
             checkcfg[FixParamTypes.FuncName] = rst
 
-            check_funcs.get_func_params(rst, cfg, section, checkcfg)
+            check_funcs.get_func_params(rst, cfg, section, checkcfg, logger if logger else self.logger)
 
             self.checkcfglist.append(checkcfg)
             
@@ -239,10 +241,10 @@ class CfgSrcData(object):
             elif backupcfg[FixParamTypes.FuncName] == backup_func_missing.func_name:
                 pass
             else:
-                raise Exception('unknown function name')
+                raise Exception('unknown function name %s' % backupcfg[FixParamTypes.FuncName])
             
 
-    def parse(self, inipath=None, need_backup=True):
+    def parse(self, inipath=None, need_backup=True, logger=None):
         try:
             if inipath is None:
                 inipath = self.path
@@ -251,13 +253,13 @@ class CfgSrcData(object):
 
             if inipath is None:
                 print('CfgSrcData ini path is none')
-                #LogLib.logger.error('CfgSrcData ini path is none')
+                self.logger.error('CfgSrcData ini path is none')
                 return None
 
             cfgobj = public.parse_ini_file(inipath)
             if cfgobj is None:
                 print('CfgSrcData ini params error')
-                #LogLib.logger.error('CfgSrcData ini params error')
+                self.logger.error('CfgSrcData ini params error')
                 return None
 
             self.parse_src_config(cfgobj)
@@ -271,13 +273,13 @@ class CfgSrcData(object):
 
             return True
         except Exception as data:
-            #LogLib.logger.error('CfgSrcData parse except %s' %s (str(data)))
+            self.logger.error('CfgSrcData parse except %s' % (str(data)))
             return False
             
-    
+    '''
     def setparams(self, params, index=-1):
         params.update(self.cfginfos)
-        
+        '''
 
 if __name__ == '__main__':
     print('done')

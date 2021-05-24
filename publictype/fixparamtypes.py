@@ -199,6 +199,7 @@ class FixParamTypes(Enum):
     Filters = 'filters'                #过滤条件
     CfgFilePath = 'cfg_file_path'      #配置文件路径，可以是全路径，也可以是日志文件名，保存到默认目录
     LogFilePath = 'log_file_path'      #日志文件路径，可以是全路径，也可以是日志文件名，保存到默认目录
+    CurLogger = 'cur_logger'           #当前使用的日志模块
 
     CfgObj = 'cfg_obj'                 #配置文件解析出的对象
     CfgObjList = 'cfg_obj_list'        #配置文件解析出的对象的列表

@@ -19,6 +19,9 @@ import time
 from publictype.fixparamtypes import FixParamTypes
 
 class FixReadData(object):
+    def __init__(self, logger):
+        self.logger = logger
+        
     #读单个grib2文件，返回以seqnum为key，文件中grib为value的字典
     def read_gribdata_from_grib2_with_pygrib_single_file_seqnum(self, params):
         from publictype.gribtypes import GribTypes
@@ -37,9 +40,13 @@ class FixReadData(object):
         seqfield = params[FixParamTypes.SeqField] if FixParamTypes.SeqField in params else GribTypes.endStep
         pnumfield = params[FixParamTypes.PNumField] if FixParamTypes.PNumField in params else None   #GribTypes.perturbationNumber
         
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
+
         try:
             import pygrib
-            #LogLib.logger.info('FixReadData read_gribdata_from_grib2_with_pygrib_single_file_seqnum start %s' % (str(params)))
+            logger.info('FixReadData read_gribdata_from_grib2_with_pygrib_single_file_seqnum start %s' % (str(params)))
             
             rst = {}
             grbs = pygrib.open(from_file)
@@ -75,10 +82,10 @@ class FixReadData(object):
                     if curkey in seq_and_p_num:
                         rst[curkey] = grb
 
-            #LogLib.logger.info('FixReadData read_gribdata_from_grib2_with_pygrib_single_file_seqnum over %s' % (str(params)))
+            logger.info('FixReadData read_gribdata_from_grib2_with_pygrib_single_file_seqnum over %s' % (str(params)))
             return rst
         except Exception as data:
-            #LogLib.logger.error('FixReadData read_gribdata_from_grib2_with_pygrib_single_file_seqnum except %s %s' % (str(params), str(data)))
+            logger.error('FixReadData read_gribdata_from_grib2_with_pygrib_single_file_seqnum except %s %s' % (str(params), str(data)))
 
             return None
         

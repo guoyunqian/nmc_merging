@@ -12,11 +12,12 @@ import os
 import shutil
 import datetime
 
+import public
 from publictype.fixparamtypes import FixParamTypes
 
 func_name = 'diff_value_num'
 
-def get_params(cfg, section, params):
+def get_params(cfg, section, params, logger):
     #数据场中不同数值的最小数目
     rst = public.get_opt_int(cfg, section, 'diff_num')
     if rst is None:
@@ -25,7 +26,7 @@ def get_params(cfg, section, params):
     params[FixParamTypes.DiffNum] = rst
 
 
-def run_func(params):
+def run_func(params, logger):
     grd = params[FixParamTypes.GridData]
     diff_num = params[FixParamTypes.DiffNum]
 

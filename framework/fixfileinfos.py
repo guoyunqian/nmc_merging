@@ -16,7 +16,8 @@ from publictype.fixparamtypes import FixParamTypes
 import public
 
 class FixFileInfos(object):
-    def __init__(self, minsize=0):
+    def __init__(self, logger, minsize=0):
+        self.logger = logger
         self.minsize = minsize
         return super().__init__()
     
@@ -135,10 +136,10 @@ class FixFileInfos(object):
         s_f_delta = params[FixParamTypes.SFDelta] if FixParamTypes.SFDelta in params else None
 
         try:
-            #LogLib.logger.info('FixFileInfos get_fix_path_list_last start %s' % (str(params)))
+            self.logger.info('FixFileInfos get_fix_path_list_last start %s' % (str(params)))
             path = public.get_path_with_replace(fix_dict, dt=dt)
             if not os.path.exists(path):
-                #LogLib.logger.warning('FixFileInfos get_fix_path_list_last no file')
+                self.logger.warning('FixFileInfos get_fix_path_list_last no file')
                 return None
 
             tmpfnfmt = public.get_path_with_replace(fix_fn_fmt, dt=dt, seq=fix_seq)
@@ -170,13 +171,13 @@ class FixFileInfos(object):
             if len(fullpaths) > 0:
                 fullpaths.sort()
 
-                #LogLib.logger.info('FixFileInfos get_fix_path_list_last over')
+                self.logger.info('FixFileInfos get_fix_path_list_last over')
                 return os.path.join(path, fullpaths[-1])
             else:
-                #LogLib.logger.warning('FixFileInfos get_fix_path_list_last no file')
+                self.logger.warning('FixFileInfos get_fix_path_list_last no file')
                 return None
         except Exception as data:
-            #LogLib.logger.error('FixFileInfos get_fix_path_list_last except %s %s' % (str(params), str(data)))
+            self.logger.error('FixFileInfos get_fix_path_list_last except %s %s' % (str(params), str(data)))
 
             raise data
             
@@ -187,9 +188,13 @@ class FixFileInfos(object):
         save_dict = params[FixParamTypes.DDict]
         save_fn_fmt = params[FixParamTypes.DFnFmt]
         save_seq = params[FixParamTypes.DSeq]
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
 
         try:
-            #LogLib.logger.info('FixFileInfos get_save_path start %s' % (str(params)))
+            self.logger.info('FixFileInfos get_save_path start %s' % (str(params)))
             saveinfos = {}
             
             path = public.get_path_with_replace(save_dict, dt=dt)
@@ -198,11 +203,11 @@ class FixFileInfos(object):
 
                 saveinfos[s] = os.path.join(path, tmpfnfmt)
 
-            #LogLib.logger.info('FixFileInfos get_save_path over')
+            self.logger.info('FixFileInfos get_save_path over')
 
             return saveinfos
         except Exception as data:
-            #LogLib.logger.error('FixFileInfos get_save_path except %s %s' % (str(params), str(data)))
+            self.logger.error('FixFileInfos get_save_path except %s %s' % (str(params), str(data)))
 
             raise data
             

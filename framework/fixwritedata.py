@@ -15,6 +15,9 @@ import shutil
 from publictype.fixparamtypes import FixParamTypes
 
 class FixWriteData(object):
+    def __init__(self, logger):
+        self.logger = logger
+        
     def path_exists(self, path, creat_dir=True):
         if not os.path.exists(path):
             if creat_dir:
@@ -84,11 +87,15 @@ class FixWriteData(object):
 
         dlon = self.proc_sign(dlon, slon, elon)
         dlat = self.proc_sign(dlat, slat, elat)
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
 
         save_path_tmp = save_path + '.tmp'
 
         try:
-            #LogLib.logger.info('FixWriteData save_griddata_to_m4_no_meb start %s' % (save_path))
+            logger.info('FixWriteData save_griddata_to_m4_no_meb start %s' % (save_path))
 
             path,file = os.path.split(save_path)
             self.path_exists(path, creat_dir)
@@ -119,11 +126,11 @@ class FixWriteData(object):
 
             shutil.move(save_path_tmp, save_path)
 
-            #LogLib.logger.info('FixWriteData save_griddata_to_m4_no_meb over %s' % (save_path))
+            logger.info('FixWriteData save_griddata_to_m4_no_meb over %s' % (save_path))
 
             return True
         except Exception as data:
-            #LogLib.logger.error('FixWriteData save_griddata_to_m4_no_meb except:%s' % (str(data)))
+            logger.error('FixWriteData save_griddata_to_m4_no_meb except:%s' % (str(data)))
             
             if os.path.exists(save_path_tmp):
                 os.remove(save_path_tmp)
