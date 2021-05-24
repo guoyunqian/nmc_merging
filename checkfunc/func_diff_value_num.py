@@ -25,6 +25,9 @@ def get_params(cfg, section, params, logger):
         
     params[FixParamTypes.DiffNum] = rst
 
+def set_params(params, grd, checkcfg, logger):
+    params[FixParamTypes.GridData] = grd
+    params[FixParamTypes.DiffNum] = checkcfg[FixParamTypes.DiffNum]
 
 def run_func(params, logger):
     grd = params[FixParamTypes.GridData]

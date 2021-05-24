@@ -38,9 +38,15 @@ def get_params(cfg, section, params, logger):
         raise Exception('check_value_scope %s replace_src error' % section)
     
     params[FixParamTypes.CfgFilePath] = rst
+    
+def set_params(params, grd, checkcfg, logger):
+    params[FixParamTypes.GridData] = grd
+    params[FixParamTypes.MinValue] = checkcfg[FixParamTypes.MinValue]
+    params[FixParamTypes.MaxValue] = checkcfg[FixParamTypes.MaxValue]
+    params[FixParamTypes.CfgFilePath] = checkcfg[CfgFilePath]
 
 def run_func(params, logger):
-    pass
+    return True
 
 if __name__ == '__main__':
     print('done')

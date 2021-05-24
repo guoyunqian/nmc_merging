@@ -26,6 +26,7 @@ from framework.fixreaddata import FixReadData
 from framework.fixwritedata import FixWriteData
 
 import procfunc
+import checkfunc
 
 #时间设定应该是和s_is_bjt保持一致，s_is_bjt是true，这两个时间就应该是北京时间，否则是utc时间
 #结束时间和小时数（t_num）不会同时使用到，分别对应不同的获取时间列表的函数
@@ -265,8 +266,17 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata):
                                                  seq_field=GribTypes.stepRange, gribrst=False, seq_key_is_num=True, logger=logger)
         if grdlist is None:
             logger.error('read_data read file error %s' % (fixfullpath))
-            sys.exit(1)
+            return False
         
+        keys = list(grdlist.keys())
+        for k in keys:
+            for checkcfg in bobj.checkcfglist:
+                checkparams = {}
+                checkfunc.checkfuncs.set_func_params(checkcfg[FixParamTypes.FuncName], checkparams, grdlist[k], checkcfg, logger)
+                if checkfunc.checkfuncs.run_func(checkcfg[FixParamTypes.FuncName], checkparams, logger):
+                    del grdlist[k]
+                    break
+
         for k,v in grdlist.items():
             cur_src_datas[k-seq_delta] = v
             cur_total_seq.add(k-seq_delta)
@@ -297,6 +307,8 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata):
         src_datas[srccfg[FixParamTypes.DatasName]] = rsts
         
     logger.info('read_data over')
+
+    return True
 
 def get_save_paths(ffinfos):
     logger = loglib.getlogger(log_file_name)

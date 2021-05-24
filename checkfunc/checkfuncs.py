@@ -18,6 +18,14 @@ def get_func_params(funcname, cfg, section, params, logger):
         checkfunc_check_value_scope.get_params(cfg, section, params, logger)
     else:
         raise Exception('unknown function name %s' % funcname)
+    
+def set_func_params(funcname, params, grd, checkcfg, logger):
+    if funcname == checkfunc_diff_value_num.func_name:
+        checkfunc_diff_value_num.set_params(params, grd, checkcfg, logger)
+    elif funcname == checkfunc_check_value_scope.func_name:
+        checkfunc_check_value_scope.set_params(params, grd, checkcfg, logger)
+    else:
+        raise Exception('unknown function name %s' % funcname)
 
 def run_func(funcname, params, logger):
     if funcname == checkfunc_diff_value_num.func_name:

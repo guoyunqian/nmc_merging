@@ -134,12 +134,16 @@ class FixFileInfos(object):
         fix_fn_fmt = params[FixParamTypes.SFnFmt]
         fix_seq = params[FixParamTypes.SSeq] if FixParamTypes.SSeq in params else None
         s_f_delta = params[FixParamTypes.SFDelta] if FixParamTypes.SFDelta in params else None
-
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
+            
         try:
-            self.logger.info('FixFileInfos get_fix_path_list_last start %s' % (str(params)))
+            logger.info('FixFileInfos get_fix_path_list_last start %s' % (str(params)))
             path = public.get_path_with_replace(fix_dict, dt=dt)
             if not os.path.exists(path):
-                self.logger.warning('FixFileInfos get_fix_path_list_last no file')
+                logger.warning('FixFileInfos get_fix_path_list_last no file')
                 return None
 
             tmpfnfmt = public.get_path_with_replace(fix_fn_fmt, dt=dt, seq=fix_seq)
@@ -171,13 +175,13 @@ class FixFileInfos(object):
             if len(fullpaths) > 0:
                 fullpaths.sort()
 
-                self.logger.info('FixFileInfos get_fix_path_list_last over')
+                logger.info('FixFileInfos get_fix_path_list_last over')
                 return os.path.join(path, fullpaths[-1])
             else:
-                self.logger.warning('FixFileInfos get_fix_path_list_last no file')
+                logger.warning('FixFileInfos get_fix_path_list_last no file')
                 return None
         except Exception as data:
-            self.logger.error('FixFileInfos get_fix_path_list_last except %s %s' % (str(params), str(data)))
+            logger.error('FixFileInfos get_fix_path_list_last except %s %s' % (str(params), str(data)))
 
             raise data
             
