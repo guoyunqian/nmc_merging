@@ -11,6 +11,7 @@ Created on Aug 21, 2020
 import os
 import numpy as np
 import shutil
+import pandas as pd
 
 from publictype.fixparamtypes import FixParamTypes
 
