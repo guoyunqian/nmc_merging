@@ -137,5 +137,46 @@ class FixWriteData(object):
 
             raise data
         
+    #pandas.DataFrame or xarray or numpy
+    def save_data_to_bin_with_struct(self, params):
+        import struct
+
+        savegrd = params[FixParamTypes.GridData]
+        save_path = params[FixParamTypes.DFullPath]
+        creat_dir = params[FixParamTypes.IsCreatDir] if FixParamTypes.IsCreatDir in params else True
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
+
+        save_path_tmp = save_path + '.tmp'
+
+        try:
+            logger.info('FixWriteData save_data_to_bin_with_struct start %s' % (save_path))
+            
+            path,file = os.path.split(save_path)
+            self.path_exists(path, creat_dir)
+            
+            if type(savegrd) is pd.DataFrame:
+                savegrd = savegrd.values
+
+            bindata = struct.pack(('%df' % savegrd.size), *savegrd.reshape(savegrd.size))
+
+            with open(save_path_tmp, 'wb') as f:
+                f.write(bindata)
+
+            shutil.move(save_path_tmp, save_path)
+
+            logger.info('FixWriteData save_data_to_bin_with_struct over %s' % (save_path))
+
+            return True
+        except Exception as data:
+            logger.error('FixWriteData save_data_to_bin_with_struct except:%s' % (str(data)))
+            
+            if os.path.exists(save_path_tmp):
+                os.remove(save_path_tmp)
+
+            raise data
+        
 if __name__ == '__main__':
     print('done')

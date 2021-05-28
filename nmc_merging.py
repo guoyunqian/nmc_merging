@@ -332,10 +332,10 @@ def get_save_paths(ffinfos):
 
     return True
 
-def write_data(cfgobj, fwrite):
+def write_data_m4(cfgobj, fwrite):
     logger = loglib.getlogger(log_file_name)
 
-    logger.info('write_data start')
+    logger.info('write_data_m4 start')
 
     #保存
     wparams = {}
@@ -363,7 +363,26 @@ def write_data(cfgobj, fwrite):
         else:
             logger.error('save griddata file file error %s' % (dst_fullpaths[seqnum]))
 
-    logger.info('write_data over')
+    logger.info('write_data_m4 over')
+    
+def write_data_bin(cfgobj, fwrite):
+    logger = loglib.getlogger(log_file_name)
+
+    logger.info('write_data_bin start')
+
+    #保存
+    wparams = {}
+
+    for seqnum,griddata in dst_datas.items():
+        wparams[FixParamTypes.GridData] = griddata.values
+        wparams[FixParamTypes.DFullPath] = dst_fullpaths[seqnum]
+
+        if fwrite.save_data_to_bin_with_struct(wparams):
+            logger.info('save griddata file over %s' % (dst_fullpaths[seqnum]))
+        else:
+            logger.error('save griddata file file error %s' % (dst_fullpaths[seqnum]))
+
+    logger.info('write_data_bin over')
 
 def proc(cfgobj):
     logger = loglib.getlogger(log_file_name)
@@ -394,7 +413,7 @@ def proc(cfgobj):
         return
 
     #保存
-    write_data(cfgobj, fwrite)
+    write_data_bin(cfgobj, fwrite)
 
 if __name__ == '__main__':
     workdir = os.path.dirname(os.path.abspath(__file__))
