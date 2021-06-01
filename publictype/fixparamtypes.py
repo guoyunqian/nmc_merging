@@ -86,6 +86,10 @@ class FixParamTypes(Enum):
     DDict = 'd_dict'                   #目标文件的目录
     DDicts = 'd_dicts'                 #多个目标文件的目录
     TDict = 't_dict'                   #临时文件的目录
+
+    DDictM4 = 'd_dict_m4'              #保存m4格式的目录，一般用于同时生成多个格式文件
+    SaveM4 = 'save_m4'                 #是否保存m4
+
     SFnFmt = 's_fn_fmt'                #源文件文件名的格式
     SFnFmts = 's_fn_fmts'              #多个源文件文件名的格式
     DFnFmt = 'd_fn_fmt'                #目标文件文件名的格式
@@ -211,6 +215,7 @@ class FixParamTypes(Enum):
     GribRst = 'grib_rst'               #读grib文件时，True是返回grib，False是返回xarray
 
     ComPreferred = 'com_preferred'     #完整数据优先
+
 if __name__ == '__main__':
     
     a=FixParamTypes.STime

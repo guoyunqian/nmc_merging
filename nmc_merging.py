@@ -103,7 +103,7 @@ src_datas = {}
 dst_datas = {}
 
 #数据保存路径，以时效为key，路径为value的字典
-dst_fullpaths = {}
+#dst_fullpaths = {}
 
 #数据的起报时时间
 save_dt = None
@@ -310,12 +310,12 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata):
 
     return True
 
-def get_save_paths(ffinfos):
+def get_save_paths(ffinfos, dpath, dst_fullpaths):
     logger = loglib.getlogger(log_file_name)
 
     logger.info('get_save_paths start')
 
-    params = { FixParamTypes.DT:save_dt, FixParamTypes.DDict:cfgobj.savecfginfos[FixParamTypes.DDict],
+    params = { FixParamTypes.DT:save_dt, FixParamTypes.DDict:dpath,
               FixParamTypes.DFnFmt:cfgobj.savecfginfos[FixParamTypes.DFnFmt], FixParamTypes.DSeq:cfgobj.savecfginfos[FixParamTypes.DSeq]
               }
 
@@ -332,7 +332,7 @@ def get_save_paths(ffinfos):
 
     return True
 
-def write_data_m4(cfgobj, fwrite):
+def write_data_m4(cfgobj, fwrite, dst_fullpaths):
     logger = loglib.getlogger(log_file_name)
 
     logger.info('write_data_m4 start')
@@ -365,7 +365,7 @@ def write_data_m4(cfgobj, fwrite):
 
     logger.info('write_data_m4 over')
     
-def write_data_bin(cfgobj, fwrite):
+def write_data_bin(cfgobj, fwrite, dst_fullpaths):
     logger = loglib.getlogger(log_file_name)
 
     logger.info('write_data_bin start')
@@ -408,12 +408,25 @@ def proc(cfgobj):
         pparams = procfunc.procfuncs.set_func_params(proccfg[FixParamTypes.FuncName], save_dt, proccfg, src_datas, cfgobj.savecfginfos, dst_datas, logger)
         procfunc.procfuncs.run_func(proccfg[FixParamTypes.FuncName], pparams, logger)
         
+    dst_fullpaths = {}
     #获取数据保存信息
-    if not get_save_paths(ffinfos):
+    if not get_save_paths(ffinfos, cfgobj.savecfginfos[FixParamTypes.DDict], dst_fullpaths):
         return
 
     #保存
-    write_data_bin(cfgobj, fwrite)
+    write_data_bin(cfgobj, fwrite, dst_fullpaths)
+
+    #是否保存m4
+    if cfgobj.savecfginfos[FixParamTypes.SaveM4] == 1:
+        dst_fullpaths.clear()
+        #获取数据保存信息
+        if not get_save_paths(ffinfos, cfgobj.savecfginfos[FixParamTypes.DDictM4], dst_fullpaths):
+            return
+
+        #保存
+        write_data_m4(cfgobj, fwrite, dst_fullpaths)
+
+    os.system(save_dt.strftime('bash /space/cmadaas/dpl/NWFD01/code/nwfd/m2grib/run.sh -n -d %Y%m%d-%Y%m%d -b %H'))
 
 if __name__ == '__main__':
     workdir = os.path.dirname(os.path.abspath(__file__))

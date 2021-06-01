@@ -147,6 +147,20 @@ class CfgMain(object):
             raise Exception('save_config dlat error')
         
         self.savecfginfos[FixParamTypes.DLat] = rst
+        
+        #是否保存m4格式
+        rst = public.get_opt_int(cfg, section, 'save_m4')
+        if rst is None:
+            raise Exception('save_config save_m4 error')
+        
+        self.savecfginfos[FixParamTypes.SaveM4] = rst
+        
+        #m4文件保存路径
+        rst = public.get_opt_str(cfg, section, 'path_m4')
+        if rst is None:
+            raise Exception('save_config path_m4 error')
+
+        self.savecfginfos[FixParamTypes.DDictM4] = rst
 
     #解析源数据的信息
     def parse_data_config(self, cfg, basedir, logger=None):
