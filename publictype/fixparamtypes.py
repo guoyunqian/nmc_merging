@@ -216,6 +216,8 @@ class FixParamTypes(Enum):
 
     ComPreferred = 'com_preferred'     #完整数据优先
 
+    ExecFmt = 'exec_fmt'               #执行外部程序的命令模板，需要进行时间或者时效的替换等，也可能不需要
+
 if __name__ == '__main__':
     
     a=FixParamTypes.STime

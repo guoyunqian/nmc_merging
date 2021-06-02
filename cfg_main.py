@@ -24,12 +24,14 @@ class CfgMain(object):
         self.path = None
         #保存数据的信息
         self.savecfginfos = None
+        #保存grib2的信息
+        self.grib2cfginfos = None
         #数据源列表
         self.srccfglist = None
         #处理过程列表
         self.proccfglist = None
 
-    #保持结果的信息
+    #保存结果的信息
     def parse_save_config(self, cfg):
         self.savecfginfos = {}
 
@@ -161,6 +163,19 @@ class CfgMain(object):
             raise Exception('save_config path_m4 error')
 
         self.savecfginfos[FixParamTypes.DDictM4] = rst
+        
+    #保存grib2的信息
+    def parse_grib2_config(self, cfg):
+        self.grib2cfginfos = {}
+
+        section = 'grib_config'
+
+        #exec_fmt
+        rst = public.get_opt_str(cfg, section, 'exec_fmt')
+        #if rst is None:
+        #    raise Exception('grib_config exec_fmt error')
+
+        self.grib2cfginfos[FixParamTypes.ExecFmt] = rst
 
     #解析源数据的信息
     def parse_data_config(self, cfg, basedir, logger=None):
@@ -269,6 +284,8 @@ class CfgMain(object):
                 return False
 
             self.parse_save_config(cfgobj)
+
+            self.parse_grib2_config(cfgobj)
 
             cfgbasedir = os.path.dirname(inipath)
             self.parse_data_config(cfgobj, cfgbasedir, logger)

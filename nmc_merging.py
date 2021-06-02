@@ -49,40 +49,8 @@ fix_etime = datetime.datetime.now()  #.replace(minute=0,second=0,microsecond=0)
 #获取时间列表时，每个时间的最小间隔
 delta_t = 60
 
-#确定文件的时间差
-s_f_delta = None
-
-#确定起报时的时间差
-s_fhs_delta = None
-
-d_fhs_delta = int(2.5*60)
-
-#源文件目录
-fix_dict = None
-
-#目标文件目录
-save_dict = None
-
-#源文件名
-fix_fn_fmt = None
-
-#目标文件名
-save_fn_fmt = None
-
-#获取时间时，需要选择的小时，使用range获得，或者直接用list指定
-s_fhs = None
-
-save_fhs = None
-
-#预报时效
-s_seq = None
-d_seq = None
-
-#时效格式
-d_seq_fmt = None
-
 #日志对象
-loglib = None
+loglib = LogLibMul()
 #日志文件存储目录
 log_file_dir = 'logfiles'
 #日志文件的文件名
@@ -93,28 +61,8 @@ cfg_file_dir = 'config'
 #日志文件的文件名
 cfg_file_name = 'cfg_main.ini'
 
-#从数据源中获取的数据，以多层字典形式存在，第一层key为配置文件中的section名字
-#value为以时效为key，xarray的格点数据为value的字典
-src_datas = {}
-
-#{'data01':{ 1:xarray }}
-
-#经过处理后的需要保存的数据，以时效为key，xarray的格点数据为value的字典
-dst_datas = {}
-
-#数据保存路径，以时效为key，路径为value的字典
-#dst_fullpaths = {}
-
-#数据的起报时时间
-save_dt = None
-
 #初始化日志
-def init_log(logfiles):
-    global loglib
-
-    if loglib is None:
-        loglib = LogLibMul()
-
+def init_log(logfiles, loglib):
     loglib.init(logfiles.keys())
     loglib.addTimedRotatingFileHandler(logfiles)
 
@@ -124,106 +72,6 @@ def init_log(logfiles):
 
     loglib.setLevel(levels)
     
-'''
-def set_params(params, workdir):
-    try:
-        global fix_dict
-        if FixParamTypes.SDict in params:
-            fix_dict = params[FixParamTypes.SDict]
-        else:
-            fix_dict = None
-
-        global fix_fn_fmt
-        if FixParamTypes.SFnFmt in params:
-            fix_fn_fmt = params[FixParamTypes.SFnFmt]
-        else:
-            fix_fn_fmt = None
-            
-        global s_fhs
-        if FixParamTypes.SFHS in params:
-            s_fhs = params[FixParamTypes.SFHS]
-        else:
-            s_fhs = None
-            
-        global s_seq
-        if FixParamTypes.SSeq in params:
-            s_seq = params[FixParamTypes.SSeq]
-        else:
-            s_seq = None
-            
-        global save_dict
-        if FixParamTypes.DDict in params:
-            save_dict = params[FixParamTypes.DDict]
-        else:
-            save_dict = None
-            
-        global save_fn_fmt
-        if FixParamTypes.DFnFmt in params:
-            save_fn_fmt = params[FixParamTypes.DFnFmt]
-        else:
-            save_fn_fmt = None
-            
-        global save_fhs
-        if FixParamTypes.DFHS in params:
-            save_fhs = params[FixParamTypes.DFHS]
-        else:
-            save_fhs = None
-            
-        global d_seq
-        if FixParamTypes.DSeq in params:
-            d_seq = params[FixParamTypes.DSeq]
-        else:
-            d_seq = None
-            
-        global d_seq_fmt
-        if FixParamTypes.DSeqFmt in params:
-            d_seq_fmt = params[FixParamTypes.DSeqFmt]
-        else:
-            d_seq_fmt = None
-            
-        global fix_stime
-        if FixParamTypes.STime in params:
-            fix_stime = params[FixParamTypes.STime]
-            
-        global fix_etime
-        if FixParamTypes.ETime in params:
-            fix_etime = params[FixParamTypes.ETime]
-
-        global dtinfospath
-        if FixParamTypes.RecordPath in params:
-           dtinfospath = params[FixParamTypes.RecordPath]
-           if dtinfospath is None or len(dtinfospath) == 0:
-               raise Exception('RecordPath error')
-
-           dtinfospath = public.get_path_infos(dtinfospath, workdir=workdir)[1]
-        else:
-            dtinfospath = None
-
-        global s_f_delta
-        if FixParamTypes.SFDelta in params:
-            s_f_delta = params[FixParamTypes.SFDelta]
-        else:
-            s_f_delta = None
-            
-        global s_fhs_delta
-        if FixParamTypes.SFhsDelta in params:
-            s_fhs_delta = params[FixParamTypes.SFhsDelta]
-        else:
-            s_fhs_delta = None
-            
-        global d_fhs_delta
-        if FixParamTypes.DFhsDelta in params:
-            d_fhs_delta = params[FixParamTypes.DFhsDelta]
-        else:
-            d_fhs_delta = None
-
-        return True
-    except Exception as data:
-        print(str(data))
-        return False
-    '''
-
-
 def need_backup(exist_seq, need_seq, seq_delta=0):
     need_seq_set = set(need_seq)
     exist_seq_set = set(exist_seq)
@@ -233,9 +81,7 @@ def need_backup(exist_seq, need_seq, seq_delta=0):
     return (len(need_seq_set.difference(exist_seq_set)) > 0)
 
 #读数据
-def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata):
-    logger = loglib.getlogger(srccfg[FixParamTypes.DatasName])
-
+def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata, savedt, src_datas, delta_t, logger):
     logger.info('read_data start')
 
     read_data_list = []
@@ -260,7 +106,7 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata):
             logger.warning('read_data no file %s' % (str(flistparams)))
             continue
             
-        seq_delta = int((save_dt - read_dt).total_seconds() / 3600)
+        seq_delta = int((savedt - read_dt).total_seconds() / 3600)
         
         grdlist = public.get_grid_from_grib_file(frdata, fixfullpath, read_dt, list(map(lambda x:x+seq_delta, srccfg[FixParamTypes.DSeq])),
                                                  seq_field=GribTypes.stepRange, gribrst=False, seq_key_is_num=True, logger=logger)
@@ -310,13 +156,11 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata):
 
     return True
 
-def get_save_paths(ffinfos, dpath, dst_fullpaths):
-    logger = loglib.getlogger(log_file_name)
-
+def get_save_paths(ffinfos, dpath, dst_fullpaths, savecfginfos, savedt, logger):
     logger.info('get_save_paths start')
 
-    params = { FixParamTypes.DT:save_dt, FixParamTypes.DDict:dpath,
-              FixParamTypes.DFnFmt:cfgobj.savecfginfos[FixParamTypes.DFnFmt], FixParamTypes.DSeq:cfgobj.savecfginfos[FixParamTypes.DSeq]
+    params = { FixParamTypes.DT:savedt, FixParamTypes.DDict:dpath,
+              FixParamTypes.DFnFmt:savecfginfos[FixParamTypes.DFnFmt], FixParamTypes.DSeq:savecfginfos[FixParamTypes.DSeq]
               }
 
     saveinfos = ffinfos.get_save_path(params)
@@ -332,14 +176,12 @@ def get_save_paths(ffinfos, dpath, dst_fullpaths):
 
     return True
 
-def write_data_m4(cfgobj, fwrite, dst_fullpaths):
-    logger = loglib.getlogger(log_file_name)
-
+def write_data_m4(cfgobj, fwrite, dst_fullpaths, savedt, dst_datas, logger):
     logger.info('write_data_m4 start')
 
     #保存
     wparams = {}
-    wparams[FixParamTypes.DT] = save_dt
+    wparams[FixParamTypes.DT] = savedt
 
     wparams[FixParamTypes.NLon] = cfgobj.savecfginfos[FixParamTypes.NLon]
     wparams[FixParamTypes.NLat] = cfgobj.savecfginfos[FixParamTypes.NLat]
@@ -365,9 +207,7 @@ def write_data_m4(cfgobj, fwrite, dst_fullpaths):
 
     logger.info('write_data_m4 over')
     
-def write_data_bin(cfgobj, fwrite, dst_fullpaths):
-    logger = loglib.getlogger(log_file_name)
-
+def write_data_bin(cfgobj, fwrite, dst_fullpaths, dst_datas, logger):
     logger.info('write_data_bin start')
 
     #保存
@@ -384,61 +224,78 @@ def write_data_bin(cfgobj, fwrite, dst_fullpaths):
 
     logger.info('write_data_bin over')
 
-def proc(cfgobj):
-    logger = loglib.getlogger(log_file_name)
-    
+def proc(cfgobj, etime, delta_t, logger, loglib):
     ffinfos = FixFileInfos(logger)
     frdata = FixReadData(logger)
     fwrite = FixWriteData(logger)
     
-    global save_dt
-    save_e_time = fix_etime+datetime.timedelta(minutes=cfgobj.savecfginfos[FixParamTypes.DFhsDelta])
+    #global save_dt
+    save_e_time = etime+datetime.timedelta(minutes=cfgobj.savecfginfos[FixParamTypes.DFhsDelta])
+    #数据的起报时时间
     save_dt = public.get_dt_with_fhs(save_e_time, cfgobj.savecfginfos[FixParamTypes.DFHS], delta_t)
 
-    minseqnum = int((fix_etime.replace(minute=0, second=0, microsecond=0) - save_dt).total_seconds() / 3600)
+    minseqnum = int((etime.replace(minute=0, second=0, microsecond=0) - save_dt).total_seconds() / 3600)
+    
+    #从数据源中获取的数据，以多层字典形式存在，第一层key为配置文件中的section名字
+    #value为以时效为key，xarray的格点数据为value的字典
+    src_datas = {}
 
     #从数据源获得数据
     for srccfg in cfgobj.srccfglist:
         cur_d_seq = srccfg[FixParamTypes.DSeq] if minseqnum <= 0 else list(set(srccfg[FixParamTypes.DSeq]).difference(set(range(1, minseqnum+1))))
 
-        read_data(fix_etime, srccfg, cur_d_seq, ffinfos, frdata)
+        read_data(etime, srccfg, cur_d_seq, ffinfos, frdata, save_dt, src_datas, delta_t, loglib.getlogger(srccfg[FixParamTypes.DatasName]))
+
+    #经过处理后的需要保存的数据，以时效为key，xarray的格点数据为value的字典
+    dst_datas = {}
 
     #处理数据
     for proccfg in cfgobj.proccfglist:
         pparams = procfunc.procfuncs.set_func_params(proccfg[FixParamTypes.FuncName], save_dt, proccfg, src_datas, cfgobj.savecfginfos, dst_datas, logger)
         procfunc.procfuncs.run_func(proccfg[FixParamTypes.FuncName], pparams, logger)
         
+    #数据保存路径，以时效为key，路径为value的字典
     dst_fullpaths = {}
+
     #获取数据保存信息
-    if not get_save_paths(ffinfos, cfgobj.savecfginfos[FixParamTypes.DDict], dst_fullpaths):
+    if not get_save_paths(ffinfos, cfgobj.savecfginfos[FixParamTypes.DDict], dst_fullpaths, cfgobj.savecfginfos, save_dt, logger):
         return
 
     #保存
-    write_data_bin(cfgobj, fwrite, dst_fullpaths)
+    write_data_bin(cfgobj, fwrite, dst_fullpaths, dst_datas, logger)
 
     #是否保存m4
     if cfgobj.savecfginfos[FixParamTypes.SaveM4] == 1:
         dst_fullpaths.clear()
         #获取数据保存信息
-        if not get_save_paths(ffinfos, cfgobj.savecfginfos[FixParamTypes.DDictM4], dst_fullpaths):
+        if not get_save_paths(ffinfos, cfgobj.savecfginfos[FixParamTypes.DDictM4], dst_fullpaths, cfgobj.savecfginfos, save_dt, logger):
             return
 
         #保存
-        write_data_m4(cfgobj, fwrite, dst_fullpaths)
+        write_data_m4(cfgobj, fwrite, dst_fullpaths, save_dt, dst_datas, logger)
 
-    os.system(save_dt.strftime('bash /space/cmadaas/dpl/NWFD01/code/nwfd/m2grib/run.sh -n -d %Y%m%d-%Y%m%d -b %H'))
+    #os.system(save_dt.strftime('bash /space/cmadaas/dpl/NWFD01/code/nwfd/m2grib/run.sh -n -d %Y%m%d-%Y%m%d -b %H'))
+    if cfgobj.grib2cfginfos is not None and FixParamTypes.ExecFmt in cfgobj.grib2cfginfos:
+        exec_fmt = cfgobj.grib2cfginfos[FixParamTypes.ExecFmt]
+        if exec_fmt is not None:
+            exec_cmd = public.get_path_with_replace(exec_fmt, dt=save_dt)
+            logger.info('proc %s' % exec_cmd)
+            os.system(exec_cmd)
 
 if __name__ == '__main__':
     workdir = os.path.dirname(os.path.abspath(__file__))
     
+    mainlogger = None
+
     logdir, logfile = public.get_path_infos(None, workdir=workdir, defaultdir=log_file_dir, defaultfn=log_file_name)
 
-    init_log({ log_file_name:logfile })
+    init_log({ log_file_name:logfile }, loglib)
+    mainlogger = loglib.getlogger(log_file_name)
     
     progparams = public.parse_prog_params()
     if progparams is None:
         print('program params error')
-        loglib.getlogger(log_file_name).error('program params error')
+        mainlogger.error('program params error')
         sys.exit(1)
 
     if FixParamTypes.LogFilePath in progparams:
@@ -446,7 +303,8 @@ if __name__ == '__main__':
 
         logdir, logfile = public.get_path_infos(progparams[FixParamTypes.LogFilePath], workdir=workdir, defaultdir=log_file_dir, defaultfn=log_file_name)
 
-        init_log({ log_file_name:logfile })
+        init_log({ log_file_name:logfile }, loglib)
+        mainlogger = loglib.getlogger(log_file_name)
 
     cfgfiledir = None
     cfgfilepath = None
@@ -455,31 +313,35 @@ if __name__ == '__main__':
     else:
         cfgfiledir, cfgfilepath = public.get_path_infos(None, workdir=workdir, defaultdir=cfg_file_dir, defaultfn=cfg_file_name)
 
-    cfgobj = CfgMain(loglib.getlogger(log_file_name))
+    cfgobj = CfgMain(mainlogger)
     if cfgobj.parse(cfgfilepath) is None:
         #print('config ini params error')
-        loglib.getlogger(log_file_name).logger.error('config ini params error')
+        mainlogger.error('config ini params error')
         sys.exit(1)
 
     for srccfg in cfgobj.srccfglist:
         srclogdir, srclogfile = public.get_path_infos(srccfg[FixParamTypes.LogFilePath], workdir=logdir)
-        init_log({ srccfg[FixParamTypes.DatasName]:srclogfile })
+        init_log({ srccfg[FixParamTypes.DatasName]:srclogfile }, loglib)
 
+    #如果没有参数，使用默认的fix_etime，否则使用参数运行程序
+    #如果参数是一个时间段，默认往前找对应的起报时执行，否则按指定时间执行。
     if FixParamTypes.STime in progparams and FixParamTypes.ETime in progparams:
         if progparams[FixParamTypes.STime] is None:
-            proc(cfgobj)
+            proc(cfgobj, fix_etime, delta_t, mainlogger, loglib)
         elif progparams[FixParamTypes.ETime] is None:
             fix_etime = progparams[FixParamTypes.STime]
-            proc(cfgobj)
+            proc(cfgobj, fix_etime, delta_t, mainlogger, loglib)
         else:
             stime = progparams[FixParamTypes.STime]
             etime = progparams[FixParamTypes.ETime]
+            etime = public.get_dt_with_fhs(etime, cfgobj.savecfginfos[FixParamTypes.DFHS], delta_t)
             while(stime <= etime):
                 fix_etime = etime
-                proc(cfgobj)
+                proc(cfgobj, fix_etime, delta_t, mainlogger, loglib)
 
-                etime -= datetime.timedelta(minutes=delta_t*12)
+                etime -= datetime.timedelta(minutes=delta_t)
+                etime = public.get_dt_with_fhs(etime, cfgobj.savecfginfos[FixParamTypes.DFHS], delta_t)
     else:
-        proc(cfgobj)
+        proc(cfgobj, fix_etime, delta_t, mainlogger, loglib)
 
     print('done')

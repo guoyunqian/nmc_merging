@@ -84,13 +84,45 @@ class LogLibMul:
             return False
         
     def getlogger(self, name):
-        return self.loggers[name]
+        return self.loggers[name] if name in self.loggers else None
+
+    def removeHandle(self, name):
+        try:
+            self.loggers[name].removeHandler(self.lhandles[name])
+        except Exception as r_data:
+            print('LogLib removeHandle removeHandle error %s %s' % (name, str(r_data)))
+            
+        try:
+            self.lhandles[name].flush()
+        except Exception as f_data:
+            print('LogLib removeHandle handle flush error %s %s' % (name, str(f_data)))
+
+        try:
+            self.lhandles[name].close()
+        except Exception as c_data:
+            print('LogLib removeHandle handle close error %s %s' % (name, str(c_data)))
+
+        del self.lhandles[name]
+        
+    def removeLogger(self, name):
+        """
+        不建议使用该函数，这个函数只能清理logger的handle，并在当前类中清除，不能在logging库中清除。
+        """
+        self.removeHandle(name)
+
+        del self.loggers[name]
+
 
     def uninit(self):
         """
         清理
         """
         for name, lhandle in self.lhandles.items():
+            try:
+                self.loggers[name].removeHandler(lhandle)
+            except Exception as r_data:
+                print('LogLib uninit remove handle error %s %s' % (name, str(r_data)))
+
             try:
                 lhandle.flush()
             except Exception as f_data:
@@ -101,11 +133,6 @@ class LogLibMul:
             except Exception as c_data:
                 print('LogLib uninit close error %s %s' % (name, str(c_data)))
 
-            try:
-                self.loggers[name].removeHandler(lhandle)
-            except Exception as r_data:
-                print('LogLib uninit remove handle error %s %s' % (name, str(r_data)))
-        
         self.lhandles.clear()
 
         self.loggers.clear()
