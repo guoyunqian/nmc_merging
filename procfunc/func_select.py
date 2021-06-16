@@ -76,7 +76,7 @@ def run_func(params, logger):
     dlon = params[FixParamTypes.DLon]
     dlat = params[FixParamTypes.DLat]
     level = params[FixParamTypes.Level] if FixParamTypes.Level in params else 0
-    seq = params[FixParamTypes.SeqObj] if FixParamTypes.SeqObj in params else None
+    seq = params[FixParamTypes.SeqObj]
     miss_value = params[FixParamTypes.Miss] if FixParamTypes.Miss in params else 9999.0
     data_name = params[FixParamTypes.DName] if FixParamTypes.DName in params else 'data0'
     scale_decimals = params[FixParamTypes.ScaleDecimals] if FixParamTypes.ScaleDecimals in params else 2

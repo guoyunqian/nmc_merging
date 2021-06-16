@@ -37,7 +37,7 @@ class FixReadData(object):
             else:
                 seq_and_p_num = list(map(str, params[FixParamTypes.SeqObj]))
 
-        seqfield = params[FixParamTypes.SeqField] if FixParamTypes.SeqField in params else GribTypes.endStep
+        #seqfield = params[FixParamTypes.SeqField] if FixParamTypes.SeqField in params else GribTypes.endStep
         pnumfield = params[FixParamTypes.PNumField] if FixParamTypes.PNumField in params else None   #GribTypes.perturbationNumber
         
         logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
@@ -52,12 +52,20 @@ class FixReadData(object):
             grbs = pygrib.open(from_file)
             for grb in grbs:
                 seqnum = 0
+                if grb.productDefinitionTemplateNumber == 0:
+                    seqnum = grb.stepRange
+                elif grb.productDefinitionTemplateNumber == 8:
+                    seqnum = grb.endStep
+                else:
+                    raise Exception('error seq field')
+                '''
                 if seqfield == GribTypes.endStep:
                     seqnum = grb.endStep
                 elif seqfield == GribTypes.stepRange:
                     seqnum = grb.stepRange
                 else:
                     raise Exception('error seq field')
+                '''
 
                 if seq_key_is_num:
                     seqnum = int(seqnum)

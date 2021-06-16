@@ -90,6 +90,10 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata, savedt, src_datas, delta_t
 
     is_complete = False
 
+    if srccfg[FixParamTypes.CfgObj].srclist is None:
+        logger.error('read_data no file %s' % (str(srccfg)))
+        return False
+
     for bobj, fhs_delta in srccfg[FixParamTypes.CfgObj].srclist:
         cfgobj = bobj.srcinfos
 
@@ -109,7 +113,8 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata, savedt, src_datas, delta_t
         seq_delta = int((savedt - read_dt).total_seconds() / 3600)
         
         grdlist = public.get_grid_from_grib_file(frdata, fixfullpath, read_dt, list(map(lambda x:x+seq_delta, srccfg[FixParamTypes.DSeq])),
-                                                 seq_field=GribTypes.stepRange, gribrst=False, seq_key_is_num=True, logger=logger)
+                                                 gribrst=False, seq_key_is_num=True, logger=logger)
+                                                 #seq_field=GribTypes.stepRange, 
         if grdlist is None:
             logger.error('read_data read file error %s' % (fixfullpath))
             return False
@@ -130,7 +135,7 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata, savedt, src_datas, delta_t
         if need_backup(cur_src_datas.keys(), cur_d_seq, seq_delta):
             read_data_list.append(grdlist)
 
-            if not bobj[FixParamTypes.ComPreferred]:
+            if not cfgobj[FixParamTypes.ComPreferred]:
                 if not need_backup(cur_total_seq, cur_d_seq, seq_delta):
                     break
         else:

@@ -31,15 +31,17 @@ class FixParamTypes(Enum):
     FDelta = 'f_delta'                 #用来判断#文件存在时是否需要更新，文件修改时间大于dt加该间隔，不需要更新文件，否则需要更新。值为None，不需要更新。dt是世界时，则该间隔包含时差
     
     SFDelta = 's_f_delta'              #确定文件生成时间与文件时效时间的差值
-    SFDeltas = 's_f_deltas'
-    DFDelta = 'd_f_delta'
-    DFDeltas = 'd_f_deltas'
+    SFDeltas = 's_f_deltas'            #多个确定文件生成时间与文件时效时间的差值
+    DFDelta = 'd_f_delta'              #确定文件生成时间与文件时效时间的差值
+    DFDeltas = 'd_f_deltas'            #多个确定文件生成时间与文件时效时间的差值
 
     FhsDelta = 'fhs_delta'             #起报时的间隔
     SFhsDelta = 's_fhs_delta'          #确定提前生成/使用新的时效的文件的差值
     SFhsDeltas = 's_fhs_deltas'
     DFhsDelta = 'd_fhs_delta'
     DFhsDeltas = 'd_fhs_deltas'
+
+    SeqDelta = 'seq_delta'             #时效的间隔
 
     RangeDelta = 'range_delta'         #用于处理时间段时的时间间隔，比如确定时间的间隔，cmadaas的timeRange
     RangeDelta_OBS = 'range_delta_obs' #用于处理时间段时的时间间隔，比如确定时间的间隔
@@ -127,6 +129,7 @@ class FixParamTypes(Enum):
     DstGridData = 'dst_grid_data'      #处理过的数据
     
     DatasName = 'datas_name'           #数据集名称
+    DatasNameC = 'datas_name_c'        #用来运算的数据集名称
 
     StaID = 'sta_id'                   #站点id
     StaIDs = 'sta_ids'                 #站点ids
