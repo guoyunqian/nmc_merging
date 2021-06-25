@@ -12,6 +12,7 @@ import os
 import shutil
 import datetime
 
+import public
 from publictype.fixparamtypes import FixParamTypes
 
 func_name = 'datasource'
@@ -25,7 +26,7 @@ def get_params(cfg, section, params, logger):
     params[FixParamTypes.CfgFilePath] = rst
 
     #往回找的时间列表
-    rst = public.get_opt_float(cfg, section, 'timedelta')
+    rst = public.get_opt_str(cfg, section, 'timedelta')
     if rst is None:
         raise Exception('datasource %s timedelta error' % section)
 

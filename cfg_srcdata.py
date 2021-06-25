@@ -229,10 +229,10 @@ class CfgSrcData(object):
                 for delta in backupcfg[FixParamTypes.Deltas]:
                     self.srclist.append([self, delta])
             elif backupcfg[FixParamTypes.FuncName] == backup_func_datasource.func_name:
-                dscfg = CfgSrcData()
+                dscfg = CfgSrcData(self.logger)
                 dscfgpath = backupcfg[FixParamTypes.CfgFilePath]
                 if not os.path.isabs(dscfgpath):
-                    dscfgpath = os.path.join(os.path.dirname(self.inipath), dscfgpath)
+                    dscfgpath = os.path.join(os.path.dirname(self.path), dscfgpath)
 
                 dscfg.parse(inipath=dscfgpath, need_backup=False)
 
