@@ -23,14 +23,14 @@ def get_params(cfg, section, params, logger):
         raise Exception('max %s data error' % section)
 
     params[FixParamTypes.DatasName] = rst
-    
+    '''
     #处理过程需要用到的数据集合
     rst = public.get_opt_str(cfg, section, 'compare_data')
     if rst is None or len(rst) == 0:
         raise Exception('max %s compare_data error' % section)
 
     params[FixParamTypes.DatasNameC] = rst
-
+    '''
     #数据中缺测值
     rst = public.get_opt_float(cfg, section, 'miss_value')
     #if rst is None:
