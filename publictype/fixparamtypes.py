@@ -91,6 +91,7 @@ class FixParamTypes(Enum):
 
     DDictM4 = 'd_dict_m4'              #保存m4格式的目录，一般用于同时生成多个格式文件
     SaveM4 = 'save_m4'                 #是否保存m4
+    SaveType = 'save_type'             #保存类型
 
     SFnFmt = 's_fn_fmt'                #源文件文件名的格式
     SFnFmts = 's_fn_fmts'              #多个源文件文件名的格式

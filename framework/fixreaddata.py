@@ -22,6 +22,34 @@ class FixReadData(object):
     def __init__(self, logger):
         self.logger = logger
         
+    #处理grib的过滤条件,filters的格式为：产品分类 产品编号 层次类型 层次值，其中不需要的条件设置为-1
+    #grib2文件中对应的变量名：parameterCategory parameterNumber typeOfFirstFixedSurface level
+    def __filter_grib_msg(self, grb, filters):
+        if filters is None:
+            return True
+
+        splitrsts = filters.split()
+        if len(splitrsts) != 4:
+            raise Exception('filters format error %s' % str(filters))
+
+        rst = int(splitrsts[0])
+        if rst >= 0 and grb.parameterCategory != rst:
+            return False
+        
+        rst = int(splitrsts[1])
+        if rst >= 0 and grb.parameterNumber != rst:
+            return False
+
+        rst = int(splitrsts[2])
+        if rst >= 0 and grb.typeOfFirstFixedSurface != rst:
+            return False
+
+        rst = int(splitrsts[3])
+        if rst >= 0 and grb.level != rst:
+            return False
+
+        return True
+
     #读单个grib2文件，返回以seqnum为key，文件中grib为value的字典
     def read_gribdata_from_grib2_with_pygrib_single_file_seqnum(self, params):
         from publictype.gribtypes import GribTypes
@@ -44,6 +72,8 @@ class FixReadData(object):
         if logger is None:
             logger = self.logger
 
+        filters = params[FixParamTypes.Filters] if FixParamTypes.Filters in params else None
+
         try:
             import pygrib
             logger.info('FixReadData read_gribdata_from_grib2_with_pygrib_single_file_seqnum start %s' % (str(params)))
@@ -51,6 +81,9 @@ class FixReadData(object):
             rst = {}
             grbs = pygrib.open(from_file)
             for grb in grbs:
+                if not self.__filter_grib_msg(grb, filters):
+                    continue
+
                 seqnum = 0
                 if grb.productDefinitionTemplateNumber == 0:
                     seqnum = grb.stepRange

@@ -157,6 +157,13 @@ class CfgMain(object):
         
         self.savecfginfos[FixParamTypes.SaveM4] = rst
         
+        #数据保存类型，0是m4，1是m11，没有该section是m4
+        rst = public.get_opt_int(cfg, section, 'save_type')
+        if rst is None:
+            self.savecfginfos[FixParamTypes.SaveType] = 0
+        else:
+            self.savecfginfos[FixParamTypes.SaveType] = rst
+        
         #m4文件保存路径
         rst = public.get_opt_str(cfg, section, 'path_m4')
         if rst is None:

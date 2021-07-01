@@ -75,7 +75,18 @@ def get_grid_from_grib(grb, dt, seq=None, level_field=None, data_name="data0", l
     lat = np.arange(grb.Nj) * grb.jDirectionIncrementInDegrees + grb.latitudeOfFirstGridPointInDegrees
 
     ds = np.array(grb.values) if type(grb.values) == np.ma.core.MaskedArray else grb.values
-    da = xr.DataArray(ds.reshape((1,1,1,1,grb.Nj,grb.Ni)), coords={'member': [data_name], 'level': [level], 'time': [dt], 'dtime': [seq], 'lat': lat, 'lon': lon},
+    da = xr.DataArray(ds.reshape((1,1,1,1,grb.Nj,grb.Ni)),
+                      coords={'member': [data_name], 'level': [level], 'time': [dt], 'dtime': [seq], 'lat': lat, 'lon': lon},
+                      dims=['member', 'level', 'time', 'dtime', 'lat', 'lon'])
+    da.attrs["dtime_type"] = "hour"
+    #da.name = "data0"
+
+    return da
+
+#xaray类型
+def get_grid_from_grid_uv(grd0, grd1, logger=None):
+    da = xr.DataArray(np.vstack((grd0.values, grd1.values)),
+                      coords={'member': ['u', 'v'], 'level': grd0.level, 'time': grd0.time, 'dtime': grd0.dtime, 'lat': grd0.lat, 'lon': grd0.lon},
                       dims=['member', 'level', 'time', 'dtime', 'lat', 'lon'])
     da.attrs["dtime_type"] = "hour"
     #da.name = "data0"

@@ -138,6 +138,74 @@ class FixWriteData(object):
 
             raise data
         
+    #只包含一个场、一个时效、一个level的数据
+    #values是字典，以要素名为key，数据为多维数组，P、T、Z是1
+    #风的话一般就是u、v数据
+    def save_griddata_to_m11_no_meb(self, params):
+        savegrd = params[FixParamTypes.GridData]
+        save_path = params[FixParamTypes.DFullPath]
+        dt = params[FixParamTypes.DT]
+        seqnum = params[FixParamTypes.SeqNum] if (FixParamTypes.SeqNum in params and params[FixParamTypes.SeqNum] is not None) else 0
+        level = params[FixParamTypes.Level] if FixParamTypes.Level in params else 0
+        creat_dir = params[FixParamTypes.IsCreatDir] if FixParamTypes.IsCreatDir in params else True
+        effectiveNum = params[FixParamTypes.Decimals] if FixParamTypes.Decimals in params else 6
+        scaled_decimals = params[FixParamTypes.ScaleDecimals] if FixParamTypes.ScaleDecimals in params else 4
+        title = params[FixParamTypes.Title] if FixParamTypes.Title in params else None
+        
+        nlon = params[FixParamTypes.NLon]
+        nlat = params[FixParamTypes.NLat]
+        slon = params[FixParamTypes.SLon]
+        slat = params[FixParamTypes.SLat]
+        elon = params[FixParamTypes.ELon]
+        elat = params[FixParamTypes.ELat]
+        dlon = params[FixParamTypes.DLon]
+        dlat = params[FixParamTypes.DLat]
+        
+        dlon = self.proc_sign(dlon, slon, elon)
+        dlat = self.proc_sign(dlat, slat, elat)
+        
+        logger = params[FixParamTypes.CurLogger] if FixParamTypes.CurLogger in params else None
+        if logger is None:
+            logger = self.logger
+
+        save_path_tmp = save_path + '.tmp'
+
+        try:
+            logger.info('FixWriteData save_griddata_to_m11_no_meb start %s' % (save_path))
+
+            path,file = os.path.split(save_path)
+            self.path_exists(path, creat_dir)
+            
+            if title is None:
+                end = len(save_path)
+                start = max(0, end - 16)
+                title = save_path[start:end]
+                
+            scaled_decimals_fmt = "{:.%df}" % scaled_decimals
+            title  = ("diamond 11 " + title + "\n"
+                    + dt.strftime('%Y %m %d %H') + " " + str(int(seqnum)) + " " + str(int(level)) + " "
+                    + scaled_decimals_fmt.format(dlon) + " " + scaled_decimals_fmt.format(dlat) + " "
+                    + scaled_decimals_fmt.format(slon) + " " + scaled_decimals_fmt.format(elon) + " "
+                    + scaled_decimals_fmt.format(slat) + " " + scaled_decimals_fmt.format(elat) + " "
+                    + str(int(nlon)) + " " + str(int(nlat)))
+
+            format_str = "%." + str(effectiveNum) + "f "
+
+            np.savetxt(save_path_tmp, savegrd, delimiter=' ', fmt=format_str, header=title, comments='')
+        
+            shutil.move(save_path_tmp, save_path)
+
+            logger.info('FixWriteData save_griddata_to_m11_no_meb over %s' % (save_path))
+
+            return True
+        except Exception as data:
+            logger.error('FixWriteData save_griddata_to_m11_no_meb except:%s' % (str(data)))
+            
+            if os.path.exists(save_path_tmp):
+                os.remove(save_path_tmp)
+
+            raise data
+        
     #pandas.DataFrame or xarray or numpy
     def save_data_to_bin_with_struct(self, params):
         import struct

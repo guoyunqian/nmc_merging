@@ -206,11 +206,42 @@ def write_data_m4(cfgobj, fwrite, dst_fullpaths, savedt, dst_datas, logger):
         wparams[FixParamTypes.SeqNum] = seqnum
 
         if fwrite.save_griddata_to_m4_no_meb(wparams):
-            logger.info('save griddata file over %s' % (dst_fullpaths[seqnum]))
+            logger.info('write_data_m4 over %s' % (dst_fullpaths[seqnum]))
         else:
-            logger.error('save griddata file file error %s' % (dst_fullpaths[seqnum]))
+            logger.error('write_data_m4 error %s' % (dst_fullpaths[seqnum]))
 
     logger.info('write_data_m4 over')
+    
+def write_data_m11(cfgobj, fwrite, dst_fullpaths, savedt, dst_datas, logger):
+    logger.info('write_data_m11 start')
+
+    #保存
+    wparams = {}
+    wparams[FixParamTypes.DT] = savedt
+
+    wparams[FixParamTypes.NLon] = cfgobj.savecfginfos[FixParamTypes.NLon]
+    wparams[FixParamTypes.NLat] = cfgobj.savecfginfos[FixParamTypes.NLat]
+    wparams[FixParamTypes.SLon] = cfgobj.savecfginfos[FixParamTypes.SLon]
+    wparams[FixParamTypes.SLat] = cfgobj.savecfginfos[FixParamTypes.SLat]
+    wparams[FixParamTypes.ELon] = cfgobj.savecfginfos[FixParamTypes.ELon]
+    wparams[FixParamTypes.ELat] = cfgobj.savecfginfos[FixParamTypes.ELat]
+    wparams[FixParamTypes.DLon] = cfgobj.savecfginfos[FixParamTypes.DLon]
+    wparams[FixParamTypes.DLat] = cfgobj.savecfginfos[FixParamTypes.DLat]
+
+    wparams[FixParamTypes.Decimals] = cfgobj.savecfginfos[FixParamTypes.Decimals]
+    wparams[FixParamTypes.ScaleDecimals] = cfgobj.savecfginfos[FixParamTypes.ScaleDecimals]
+
+    for seqnum,griddata in dst_datas.items():
+        wparams[FixParamTypes.GridData] = griddata.values.reshape(2*wparams[FixParamTypes.NLat], wparams[FixParamTypes.NLon])
+        wparams[FixParamTypes.DFullPath] = dst_fullpaths[seqnum]
+        wparams[FixParamTypes.SeqNum] = seqnum
+
+        if fwrite.save_griddata_to_m11_no_meb(wparams):
+            logger.info('write_data_m11 over %s' % (dst_fullpaths[seqnum]))
+        else:
+            logger.error('write_data_m11 error %s' % (dst_fullpaths[seqnum]))
+
+    logger.info('write_data_m11 over')
     
 def write_data_bin(cfgobj, fwrite, dst_fullpaths, dst_datas, logger):
     logger.info('write_data_bin start')
@@ -277,7 +308,10 @@ def proc(cfgobj, etime, delta_t, logger, loglib):
             return
 
         #保存
-        write_data_m4(cfgobj, fwrite, dst_fullpaths, save_dt, dst_datas, logger)
+        if cfgobj.savecfginfos[FixParamTypes.SaveType] == 1:
+            write_data_m11(cfgobj, fwrite, dst_fullpaths, save_dt, dst_datas, logger)
+        else:
+            write_data_m4(cfgobj, fwrite, dst_fullpaths, save_dt, dst_datas, logger)
 
     #os.system(save_dt.strftime('bash /space/cmadaas/dpl/NWFD01/code/nwfd/m2grib/run.sh -n -d %Y%m%d-%Y%m%d -b %H'))
     if cfgobj.grib2cfginfos is not None and FixParamTypes.ExecFmt in cfgobj.grib2cfginfos:
