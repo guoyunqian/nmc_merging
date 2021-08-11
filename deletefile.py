@@ -59,10 +59,11 @@ def deltree():
     deletefiles(fix_dict, curdate, days=delta_t, dir_fmt=dir_fmt)
     
 def delfile(filepath, curdate, file_fmt):
+    fmt = curdate.strftime(file_fmt)
     for fn in os.listdir(filepath):
         fullpath = os.path.join(filepath, fn)
         if os.path.isfile(fullpath):
-            rsts =  re.findall(file_fmt, fn)
+            rsts =  re.findall(fmt, fn)
             if len(rsts) > 0:
                 os.remove(fullpath)
 

@@ -7,7 +7,7 @@ source activate
 
 cd "/space/cmadaas/dpl/NWFD01/code/nmc_merging"
 
-python3 ./nmc_merging.py
+python3 ./nmc_merging.py -l ./logfiles/nmc_merging_tmp.log -f ./config/cfg_main.ini
 
 deactivate
 
