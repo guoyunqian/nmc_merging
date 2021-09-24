@@ -113,7 +113,7 @@ def read_data(dt, srccfg, cur_d_seq, ffinfos, frdata, savedt, src_datas, delta_t
         seq_delta = int((savedt - read_dt).total_seconds() / 3600)
         
         grdlist = public.get_grid_from_grib_file(frdata, fixfullpath, read_dt, list(map(lambda x:x+seq_delta, srccfg[FixParamTypes.DSeq])),
-                                                 gribrst=False, seq_key_is_num=True, logger=logger)
+                                                 gribrst=False, seq_key_is_num=True, logger=logger, filters=cfgobj[FixParamTypes.Filters])
                                                  #seq_field=GribTypes.stepRange, 
         if grdlist is None:
             logger.error('read_data read file error %s' % (fixfullpath))

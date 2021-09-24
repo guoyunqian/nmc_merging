@@ -13,6 +13,7 @@ import shutil
 import datetime
 
 from publictype.fixparamtypes import FixParamTypes
+from publictype.columnnames import ColumnNames
 import public
 
 func_name = 'missing'
@@ -39,7 +40,7 @@ def run_func(params, logger):
     level = params[FixParamTypes.Level] if FixParamTypes.Level in params else 0
     seq = params[FixParamTypes.SeqNum] if FixParamTypes.SeqNum in params else None
     miss_value = params[FixParamTypes.Miss] if FixParamTypes.Miss in params else 9999.0
-    data_name = params[FixParamTypes.DName] if FixParamTypes.DName in params else 'data0'
+    data_name = params[FixParamTypes.DName] if FixParamTypes.DName in params else ColumnNames.MebStaDefault.value
     scale_decimals = params[FixParamTypes.ScaleDecimals] if FixParamTypes.ScaleDecimals in params else 2
 
     return public.get_grid_miss(dt, nlon, nlat, slon, slat, elon, elat, dlon, dlat,

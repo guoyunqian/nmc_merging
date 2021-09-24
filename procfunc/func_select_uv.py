@@ -10,6 +10,7 @@ Created on Jun 13, 2021
 
 import public
 from publictype.fixparamtypes import FixParamTypes
+from publictype.columnnames import ColumnNames
 
 func_name = 'select_uv'
 
@@ -85,7 +86,7 @@ def run_func(params, logger):
     level = params[FixParamTypes.Level] if FixParamTypes.Level in params else 0
     seq = params[FixParamTypes.SeqObj]
     miss_value = params[FixParamTypes.Miss] if FixParamTypes.Miss in params else 9999.0
-    data_name = params[FixParamTypes.DName] if FixParamTypes.DName in params else 'data0'
+    data_name = params[FixParamTypes.DName] if FixParamTypes.DName in params else ColumnNames.MebStaDefault.value
     scale_decimals = params[FixParamTypes.ScaleDecimals] if FixParamTypes.ScaleDecimals in params else 2
 
     dst_datas = params[FixParamTypes.DstGridData]

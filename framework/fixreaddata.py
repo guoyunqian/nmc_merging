@@ -28,7 +28,7 @@ class FixReadData(object):
         if filters is None:
             return True
 
-        splitrsts = filters.split()
+        splitrsts = filters.split(',')
         if len(splitrsts) != 4:
             raise Exception('filters format error %s' % str(filters))
 
@@ -40,8 +40,10 @@ class FixReadData(object):
         if rst >= 0 and grb.parameterNumber != rst:
             return False
 
-        rst = int(splitrsts[2])
-        if rst >= 0 and grb.typeOfFirstFixedSurface != rst:
+        #rst = int(splitrsts[2])
+        #if rst >= 0 and grb.typeOfFirstFixedSurface != rst:
+        #    return False
+        if grb.typeOfFirstFixedSurface != splitrsts[2]:
             return False
 
         rst = int(splitrsts[3])

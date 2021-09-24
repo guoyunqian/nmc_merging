@@ -107,6 +107,14 @@ class CfgSrcData(object):
             raise Exception('config complete_data_preferred error value %s' % rst)
 
         self.srcinfos[FixParamTypes.ComPreferred] = rst
+        
+        #过滤条件
+        rst = public.get_opt_str(cfg, section, 'filters')
+        if rst is not None:
+            if rst == '':
+                rst = None
+        
+        self.srcinfos[FixParamTypes.Filters] = rst
 
         #经度格点数
         rst = public.get_opt_int(cfg, section, 'nlon')

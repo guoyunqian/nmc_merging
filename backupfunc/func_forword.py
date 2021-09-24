@@ -14,6 +14,7 @@ import datetime
 
 import public
 from publictype.fixparamtypes import FixParamTypes
+from publictype.columnnames import ColumnNames
 
 func_name = 'forword'
 
@@ -29,7 +30,7 @@ def get_params(cfg, section, params, logger):
     
 '''
 def run_func(params, logger):
-    #filename, dt, seq, seq_field, level_field=None, data_name='data0', gribrst=True
+    #filename, dt, seq, seq_field, level_field=None, data_name=ColumnNames.MebStaDefault.value, gribrst=True
 
     path = params[FixParamTypes.SDict]
     fn_fmt = params[FixParamTypes.SFnFmt]
@@ -59,7 +60,7 @@ def run_func(params, logger):
     seq = params[FixParamTypes.SeqObj]
     seq_field = params[FixParamTypes.SeqField]
     level_field = params[FixParamTypes.LevelField] if FixParamTypes.LevelField in params else None
-    data_name = params[FixParamTypes.DName] if FixParamTypes.DName in params else 'data0'
+    data_name = params[FixParamTypes.DName] if FixParamTypes.DName in params else ColumnNames.MebStaDefault.value
     gribrst = params[FixParamTypes.GribRst] if FixParamTypes.GribRst in params else True
 
     needseq = []

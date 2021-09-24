@@ -9,6 +9,7 @@ Created on Jan 21, 2021
 '''
 
 import os
+import datetime
 
 #workdir、defaultdir和defaultfn是fn为None或者只是文件名字时填充目录和文件名
 #fn要么是None，空字符，要么一定要有文件名
@@ -56,6 +57,7 @@ minute_fmt = '[MM]'
 second_fmt = '[SS]'
 seq_fmt_03 = '[FFF]'
 seq_fmt_04 = '[FFFF]'
+curdt_fmt = '[curdt]'
 
 #
 def get_path_with_replace(path_or_filename, dt=None, seq=None):
@@ -87,6 +89,10 @@ def get_path_with_replace(path_or_filename, dt=None, seq=None):
         elif path_or_filename.find(seq_fmt_04) >= 0:
             path_or_filename = path_or_filename.replace(seq_fmt_04, ('%04d' % seq))
             
+    if path_or_filename.find(curdt_fmt) >= 0:
+        curdt = datetime.datetime.now()
+        path_or_filename = path_or_filename.replace(curdt_fmt, curdt.strftime('%Y%m%d%H%M%S'))
+
     return path_or_filename
 
 if __name__ == '__main__':

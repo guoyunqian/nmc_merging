@@ -13,6 +13,7 @@ import xarray as xr
 import numpy as np
 
 from publictype.fixparamtypes import FixParamTypes
+from publictype.columnnames import ColumnNames
 
 def reset(grd):
     lats = grd["lat"].values
@@ -42,7 +43,7 @@ def get_grid_from_datas(dstdatas, dt, seqobj, datas, fhsdelta):
             
     return rst
 
-def get_grid_missing(dt, nlon, nlat, slon, slat, elon, elat, dlon, dlat, level=0, seq=None, miss_value=9999., data_name = "data0", scale_decimals=2):
+def get_grid_missing(dt, nlon, nlat, slon, slat, elon, elat, dlon, dlat, level=0, seq=None, miss_value=9999., data_name = ColumnNames.MebStaDefault.value, scale_decimals=2):
     if round((nlon-1) * dlon + 0.1**(scale_decimals+1), scale_decimals) != round(elon - slon + 0.1**(scale_decimals+2)) \
         or round((nlat-1) * dlat + 0.1**(scale_decimals+1), scale_decimals) != round(elat - slat + 0.1**(scale_decimals+2)):
         raise Exception('lon lat infos error')
@@ -58,11 +59,11 @@ def get_grid_missing(dt, nlon, nlat, slon, slat, elon, elat, dlon, dlat, level=0
     da = xr.DataArray(dat, coords={'member': [data_name], 'level': [level], 'time': [dt], 'dtime': [seq], 'lat': lat, 'lon': lon},
                       dims=['member', 'level', 'time', 'dtime', 'lat', 'lon'])
     da.attrs["dtime_type"] = "hour"
-    #da.name = "data0"
+    #da.name = ColumnNames.MebStaDefault.value
 
     return da
 
-def get_grid_from_grib(grb, dt, seq=None, level_field=None, data_name="data0", logger=None):
+def get_grid_from_grib(grb, dt, seq=None, level_field=None, data_name=ColumnNames.MebStaDefault.value, logger=None):
     if seq is None:
         seq = dt.hour
 
@@ -79,7 +80,7 @@ def get_grid_from_grib(grb, dt, seq=None, level_field=None, data_name="data0", l
                       coords={'member': [data_name], 'level': [level], 'time': [dt], 'dtime': [seq], 'lat': lat, 'lon': lon},
                       dims=['member', 'level', 'time', 'dtime', 'lat', 'lon'])
     da.attrs["dtime_type"] = "hour"
-    #da.name = "data0"
+    #da.name = ColumnNames.MebStaDefault.value
 
     return da
 
@@ -89,17 +90,19 @@ def get_grid_from_grid_uv(grd0, grd1, logger=None):
                       coords={'member': ['u', 'v'], 'level': grd0.level, 'time': grd0.time, 'dtime': grd0.dtime, 'lat': grd0.lat, 'lon': grd0.lon},
                       dims=['member', 'level', 'time', 'dtime', 'lat', 'lon'])
     da.attrs["dtime_type"] = "hour"
-    #da.name = "data0"
+    #da.name = ColumnNames.MebStaDefault.value
 
     return da
 
-def get_grid_from_grib_file(fread, filename, dt, seq, seq_field=None, level_field=None, data_name='data0', gribrst=True, seq_key_is_num=False, logger=None):
+def get_grid_from_grib_file(fread, filename, dt, seq, seq_field=None, level_field=None, data_name=ColumnNames.MebStaDefault.value,
+                           gribrst=True, seq_key_is_num=False, logger=None, filters=None):
     params = {}
     params[FixParamTypes.SFullPath] = filename
     params[FixParamTypes.SeqObj] = seq
     params[FixParamTypes.SeqField] = seq_field
     params[FixParamTypes.SeqKeyIsNum] = seq_key_is_num
     params[FixParamTypes.CurLogger] = logger
+    params[FixParamTypes.Filters] = filters
 
     rsts = fread.read_gribdata_from_grib2_with_pygrib_single_file_seqnum(params)
 
