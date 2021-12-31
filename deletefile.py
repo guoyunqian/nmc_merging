@@ -91,8 +91,65 @@ def delfiles():
         
         delfile(r'/space/cmadaas/dpl/NWFD01/data/mulblend_tmin', curdate, file_fmt)
         
+def mvdir(srcdir, dstdir, curdate, dir_fmt):
+    fmt = curdate.strftime(dir_fmt)
+    for fn in os.listdir(srcdir):
+        fullpath = os.path.join(srcdir, fn)
+        if os.path.isdir(fullpath):
+            rsts =  re.findall(fmt, fn)
+            if len(rsts) > 0:
+                shutil.move(fullpath, os.path.join(dstdir, fn))
+
+def mvdirs():
+    curdt = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    delta_t = 10   #天
+    dir_fmt = r'%Y%m%d'
+
+    curdt -= datetime.timedelta(days=delta_t)
+
+    for i in range(2):
+        curdate = curdt - datetime.timedelta(days=i)
+        srcdir = curdate.strftime(r'/space/cmadaas/dpl/NWFD01/data/mulblend_grib2/BABJ/%Y')
+        dstdir = curdate.strftime(r'/space/cmadaas/dpl/NWFD01/Mulblend/mulblend_grib2/BABJ/%Y')
+
+        if not os.path.exists(dstdir):
+            os.makedirs(dstdir)
+
+        mvdir(srcdir, dstdir, curdate, dir_fmt)
+        
+def mvfile(srcdir, dstdir, curdate, file_fmt):
+    fmt = curdate.strftime(file_fmt)
+    for fn in os.listdir(srcdir):
+        fullpath = os.path.join(srcdir, fn)
+        if os.path.isfile(fullpath):
+            rsts =  re.findall(fmt, fn)
+            if len(rsts) > 0:
+                shutil.move(fullpath, os.path.join(dstdir, fn))
+
+def mvfiles():
+    curdt = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    delta_t = 10   #天
+    #Z_SEVP_C_BABJ_20211223173740_P_RFFC-SNWFD-2021122320-24003.h5
+    file_fmt = r'Z_SEVP_C_BABJ_([0-9]{14})_P_RFFC-SNWFD-%Y%m%d([0-9]{2})-([0-9]{5}).h5'
+
+    curdt -= datetime.timedelta(days=delta_t)
+
+    for i in range(2):
+        curdate = curdt - datetime.timedelta(days=i)
+        srcdir = r'/space/cmadaas/dpl/NWFD01/data/mulblend_hdf'
+        dstdir = curdate.strftime(r'/space/cmadaas/dpl/NWFD01/Mulblend/mulblend_hdf/%Y')
+
+        if not os.path.exists(dstdir):
+            os.makedirs(dstdir)
+
+        mvfile(srcdir, dstdir, curdate, file_fmt)
+        
+        
 if __name__ == '__main__':
     delfiles()
 
+    mvdirs()
+
+    mvfiles()
 
     print('done')
